@@ -1,4 +1,4 @@
-import {useEffect,useState,type FormEvent} from "react";
+import {useEffect,useState,type FormEvent,type ReactNode} from "react";
 import {createFileRoute} from "@tanstack/react-router";
 import {LayoutDashboard,Package,Boxes,ShoppingCart,ChartNoAxesCombined,ClipboardList,Users,Settings,Plus,Menu,X,Trash2,Check,ArrowDownToLine, type LucideIcon} from "lucide-react";
 export const Route=createFileRoute("/")({component:App});
@@ -43,12 +43,12 @@ return <div className="app-shell">{mobile&&<button className="scrim" onClick={()
 {tab==="settings"&&<><PageHead title="Paramètres" desc="Configurez votre boutique et sauvegardez vos données."/><form className="form-card" onSubmit={e=>{e.preventDefault();setD(v=>({...v,shop:shop.trim()||"Ma boutique"}));toast("Nom de boutique enregistré.");}}><Field label="Nom du commerce"><input value={shop} onChange={e=>sshop(e.target.value)}/></Field><p>Devise FCFA (XOF) · Fuseau Africa/Dakar</p><button className="primary-btn">Enregistrer</button></form><div className="panel"><SectionTitle title="Sauvegarde"/><button className="secondary-btn" onClick={exportData}><ArrowDownToLine/> Exporter mes données JSON</button><p className="notice">Les données sont stockées dans le navigateur de cet appareil et ne sont pas encore synchronisées en ligne. Exportez régulièrement une sauvegarde.</p></div></>}
 <footer className="footer"><b>GESTOCK</b><span>La gestion de votre commerce, simplement.</span><span>© 2026</span></footer></div></main></div>;
 }
-function PageHead({title,desc,action}:{title:string;desc:string;action?:React.ReactNode}){return <div className="page-head"><div><p className="eyebrow">GESTION COMMERCIALE</p><h1>{title}<i>.</i></h1><p>{desc}</p></div>{action}</div>}
-function Field({label,children}:{label:string;children:React.ReactNode}){return <div className="field"><label>{label}</label>{children}</div>}
+function PageHead({title,desc,action}:{title:string;desc:string;action?:ReactNode}){return <div className="page-head"><div><p className="eyebrow">GESTION COMMERCIALE</p><h1>{title}<i>.</i></h1><p>{desc}</p></div>{action}</div>}
+function Field({label,children}:{label:string;children:ReactNode}){return <div className="field"><label>{label}</label>{children}</div>}
 function SectionTitle({title}:{title:string}){return <div className="section-title"><h2>{title}</h2></div>}
 function Metric({label,value,hint,icon:Icon}:{label:string;value:string;hint:string;icon:LucideIcon}){return <div className="metric"><div>{label}<i><Icon size={18}/></i></div><b>{value}</b><small>{hint}</small></div>}
 function Stat({label,value}:{label:string;value:string}){return <div className="stat"><small>{label}</small><b>{value}</b></div>}
-function PageHeadUnused(){}
+
 function Empty({icon:Icon,title,detail}:{icon:LucideIcon;title:string;detail:string}){return <div className="empty"><Icon size={25}/><b>{title}</b><p>{detail}</p></div>}
 function ProductTable({products,adjust,remove}:{products:P[];adjust:(p:P,n:number)=>void;remove:(p:P)=>void}){return <div className="table-wrap"><table><thead><tr><th>Produit</th><th>Prix achat</th><th>Prix vente</th><th>Stock</th><th>État</th><th>Actions</th></tr></thead><tbody>{products.map(p=><tr key={p.id}><td><b>{p.name}</b><small>{p.sku}</small></td><td>{money(p.cost)}</td><td>{money(p.price)}</td><td>{p.qty}</td><td>{p.qty===0?"Rupture":p.qty<=p.alert?"Stock faible":"Disponible"}</td><td><button onClick={()=>adjust(p,-1)} disabled={p.qty<=0}>−</button> <button onClick={()=>adjust(p,1)}>+</button> <button onClick={()=>remove(p)}><Trash2 size={14}/></button></td></tr>)}</tbody></table>{!products.length&&<Empty icon={Package} title="Aucun produit" detail="Ajoutez votre premier produit."/ >}</div>}
 function SalesTable({sales}:{sales:S[]}){return <div className="table-wrap"><table><thead><tr><th>Produit</th><th>Date</th><th>Client</th><th>Total</th><th>Encaissé</th><th>Reste</th><th>Marge brute</th></tr></thead><tbody>{sales.map(s=><tr key={s.id}><td>{s.product} × {s.qty}</td><td>{new Date(s.date).toLocaleDateString("fr-FR")}</td><td>{s.customer}</td><td>{money(s.total)}</td><td>{money(s.paid)}</td><td>{money(s.total-s.paid)}</td><td>{money(s.total-s.cost)}</td></tr>)}</tbody></table>{!sales.length&&<Empty icon={ShoppingCart} title="Aucune vente" detail="Vos ventes apparaîtront ici."/ >}</div>}
