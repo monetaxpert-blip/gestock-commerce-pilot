@@ -1,120 +1,54 @@
-import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowRight, ArrowUpRight, Bell, Boxes, ChartNoAxesCombined, ChevronDown,
-  ClipboardList, LayoutDashboard, Menu, Package, Settings, ShoppingCart,
-  Users, X, type LucideIcon,
-} from "lucide-react";
-
-export const Route = createFileRoute("/")({ component: DashboardPage });
-
-type Section = "dashboard" | "products" | "stock" | "sales" | "margins" | "orders" | "customers" | "settings";
-type NavItem = { id: Section; label: string; icon: LucideIcon; description: string };
-const nav: NavItem[] = [
-  { id: "dashboard", label: "Vue d'ensemble", icon: LayoutDashboard, description: "Le résumé de votre activité" },
-  { id: "products", label: "Produits", icon: Package, description: "Votre catalogue et vos tarifs" },
-  { id: "stock", label: "Gestion du stock", icon: Boxes, description: "Les quantités et mouvements" },
-  { id: "sales", label: "Ventes", icon: ShoppingCart, description: "Les ventes et les règlements" },
-  { id: "margins", label: "Bénéfices", icon: ChartNoAxesCombined, description: "Vos marges et performances" },
-  { id: "orders", label: "Commandes", icon: ClipboardList, description: "Le suivi des commandes clients" },
-  { id: "customers", label: "Clients", icon: Users, description: "Votre fichier clients" },
-];
-const metrics = [
-  { label: "Chiffre d'affaires", hint: "Après vos premières ventes", icon: ShoppingCart },
-  { label: "Ventes réalisées", hint: "Vos ventes apparaîtront ici", icon: ChartNoAxesCombined },
-  { label: "Marge brute", hint: "Calculée avec vos coûts d'achat", icon: ArrowUpRight },
-  { label: "Références en stock", hint: "Votre catalogue de produits", icon: Boxes },
-];
-const steps: { no: string; title: string; detail: string; to: Section }[] = [
-  { no: "01", title: "Configurez votre boutique", detail: "Ajoutez les informations de votre commerce.", to: "settings" },
-  { no: "02", title: "Ajoutez vos produits", detail: "Créez votre catalogue, vos prix et vos variantes.", to: "products" },
-  { no: "03", title: "Renseignez votre stock initial", detail: "Indiquez les quantités disponibles pour démarrer.", to: "stock" },
-  { no: "04", title: "Enregistrez votre première vente", detail: "Suivez ventes, paiements et marges au même endroit.", to: "sales" },
-];
-const modules: Record<Exclude<Section, "dashboard">, { eyebrow: string; title: string; description: string; empty: string; detail: string }> = {
-  products: { eyebrow: "CATALOGUE", title: "Vos produits", description: "Centralisez vos articles, variantes, références et tarifs dans un catalogue unique.", empty: "Votre catalogue commence ici", detail: "Les produits que vous ajouterez apparaîtront dans cet espace. Vous pourrez ensuite suivre leur stock et leurs performances." },
-  stock: { eyebrow: "INVENTAIRE", title: "Gestion du stock", description: "Gardez une vision claire des quantités disponibles et de chaque mouvement de stock.", empty: "Aucun mouvement pour le moment", detail: "Votre historique affichera les stocks initiaux, approvisionnements, ventes, retours et ajustements." },
-  sales: { eyebrow: "ACTIVITÉ COMMERCIALE", title: "Vos ventes", description: "Retrouvez vos ventes, les montants encaissés et les éventuels soldes à recevoir.", empty: "Aucune vente enregistrée", detail: "Vos ventes validées et leurs règlements seront regroupés ici, avec un historique consultable." },
-  margins: { eyebrow: "PILOTAGE", title: "Bénéfices & marges", description: "Comprenez ce que vos ventes vous rapportent grâce au coût d'achat conservé pour chaque opération.", empty: "Vos indicateurs apparaîtront ici", detail: "La marge brute sera calculée à partir des ventes validées et des coûts historiques. Le bénéfice net ne sera affiché que si les charges nécessaires sont renseignées." },
-  orders: { eyebrow: "SUIVI CLIENT", title: "Commandes", description: "Suivez chaque commande, de sa confirmation jusqu'à sa livraison et son règlement.", empty: "Aucune commande en cours", detail: "Les commandes clients, acomptes, livraisons et soldes restants seront suivis dans cet espace." },
-  customers: { eyebrow: "RELATION CLIENT", title: "Vos clients", description: "Retrouvez les informations utiles et l'historique commercial de vos clients.", empty: "Votre fichier clients est vide", detail: "Les clients associés à vos ventes et commandes seront regroupés ici. Une vente comptoir pourra toujours être enregistrée sans fiche client." },
-  settings: { eyebrow: "ESPACE DE TRAVAIL", title: "Paramètres de la boutique", description: "Les informations et préférences qui définissent votre espace GESTOCK.", empty: "Votre boutique n'est pas encore configurée", detail: "La configuration du nom, de la devise et du fuseau horaire sera disponible après la mise en place de votre compte." },
-};
-
-function Brand() {
-  return <div className="brand"><span className="brand-mark"><i /><i /><i /></span><span>GESTOCK</span></div>;
+import {useEffect,useState,type FormEvent} from "react";
+import {createFileRoute} from "@tanstack/react-router";
+import {LayoutDashboard,Package,Boxes,ShoppingCart,ChartNoAxesCombined,ClipboardList,Users,Settings,Plus,Menu,X,Trash2,Check,ArrowDownToLine, type LucideIcon} from "lucide-react";
+export const Route=createFileRoute("/")({component:App});
+type Tab="dashboard"|"products"|"stock"|"sales"|"margins"|"orders"|"customers"|"settings";
+type P={id:string;name:string;sku:string;cost:number;price:number;qty:number;alert:number};
+type C={id:string;name:string;phone:string};
+type S={id:string;product:string;qty:number;price:number;cost:number;total:number;paid:number;customer:string;date:string};
+type O={id:string;customer:string;desc:string;total:number;paid:number;status:string;date:string};
+type D={shop:string;products:P[];customers:C[];sales:S[];orders:O[];moves:{id:string;product:string;qty:number;type:string;date:string}[]};
+const KEY="gestock-v1",EMPTY:D={shop:"Ma boutique",products:[],customers:[],sales:[],orders:[],moves:[]};
+const NAV:{id:Tab;label:string;icon:LucideIcon}[]=[{id:"dashboard",label:"Vue d'ensemble",icon:LayoutDashboard},{id:"products",label:"Produits",icon:Package},{id:"stock",label:"Gestion du stock",icon:Boxes},{id:"sales",label:"Ventes",icon:ShoppingCart},{id:"margins",label:"Bénéfices",icon:ChartNoAxesCombined},{id:"orders",label:"Commandes",icon:ClipboardList},{id:"customers",label:"Clients",icon:Users}];
+const uid=()=>String(Date.now())+Math.random().toString(36).slice(2),now=()=>new Date().toISOString(),money=(n:number)=>new Intl.NumberFormat("fr-FR",{maximumFractionDigits:0}).format(n)+" FCFA";
+function App(){
+const [d,setD]=useState<D>(EMPTY),[ready,setReady]=useState(false),[tab,setTab]=useState<Tab>("dashboard"),[mobile,setMobile]=useState(false),[msg,setMsg]=useState("");
+const [pform,spform]=useState(false),[name,sname]=useState(""),[sku,ssku]=useState(""),[cost,scost]=useState(""),[price,sprice]=useState(""),[qty,sqty]=useState("0"),[alert,salert]=useState("3");
+const [customer,scustomer]=useState(""),[phone,sphone]=useState(""),[stockId,sstockId]=useState(""),[stockQty,sstockQty]=useState("");
+const [saleId,ssaleId]=useState(""),[saleQty,ssaleQty]=useState("1"),[salePrice,ssalePrice]=useState(""),[saleCustomer,ssaleCustomer]=useState(""),[salePaid,ssalePaid]=useState("");
+const [orderCustomer,sorderCustomer]=useState(""),[orderDesc,sorderDesc]=useState(""),[orderTotal,sorderTotal]=useState(""),[orderPaid,sorderPaid]=useState("");
+const [shop,sshop]=useState("Ma boutique");
+useEffect(()=>{try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);setD({...EMPTY,...v});sshop(v.shop||EMPTY.shop);}}catch{setMsg("Données locales illisibles.");}setReady(true);},[]);
+useEffect(()=>{if(ready)localStorage.setItem(KEY,JSON.stringify(d));},[d,ready]);
+const toast=(s:string)=>{setMsg(s);window.setTimeout(()=>setMsg(""),3000)},go=(t:Tab)=>{setTab(t);setMobile(false)};
+const revenue=d.sales.reduce((a,x)=>a+x.total,0),received=d.sales.reduce((a,x)=>a+x.paid,0),margin=d.sales.reduce((a,x)=>a+x.total-x.cost,0),low=d.products.filter(x=>x.qty<=x.alert),chosen=d.products.find(x=>x.id===saleId);
+useEffect(()=>{if(chosen)sprice(String(chosen.price));},[saleId]);
+function addProduct(e:FormEvent){e.preventDefault();const a=+cost,b=+price,q=+qty,l=+alert;if(!name.trim()||[a,b,q,l].some(x=>!Number.isFinite(x)||x<0)||!Number.isInteger(q)||!Number.isInteger(l)){toast("Vérifiez les champs et quantités.");return;}if(d.products.some(x=>x.sku&&sku&&x.sku.toLowerCase()===sku.toLowerCase())){toast("Référence déjà utilisée.");return;}const x={id:uid(),name:name.trim(),sku:sku||"—",cost:a,price:b,qty:q,alert:l};setD(v=>({...v,products:[x,...v.products],moves:q?[{id:uid(),product:x.name,qty:q,type:"Stock initial",date:now()},...v.moves]:v.moves}));spform(false);sname("");ssku("");scost("");sprice("");sqty("0");toast("Produit ajouté.");}
+function addCustomer(e:FormEvent){e.preventDefault();if(!customer.trim()){toast("Le nom du client est obligatoire.");return;}setD(v=>({...v,customers:[{id:uid(),name:customer.trim(),phone},...v.customers]}));scustomer("");sphone("");toast("Client ajouté.");}
+function addStock(e:FormEvent){e.preventDefault();const p=d.products.find(x=>x.id===stockId),q=+stockQty;if(!p||!Number.isInteger(q)||q<1){toast("Choisissez un produit et une quantité valide.");return;}setD(v=>({...v,products:v.products.map(x=>x.id===p.id?{...x,qty:x.qty+q}:x),moves:[{id:uid(),product:p.name,qty:q,type:"Approvisionnement",date:now()},...v.moves]}));sstockQty("");toast("Stock approvisionné.");}
+function adjust(p:P,n:number){if(p.qty+n<0){toast("Stock insuffisant.");return;}setD(v=>({...v,products:v.products.map(x=>x.id===p.id?{...x,qty:x.qty+n}:x),moves:[{id:uid(),product:p.name,qty:Math.abs(n),type:"Ajustement",date:now()},...v.moves]}));}
+function addSale(e:FormEvent){e.preventDefault();const p=d.products.find(x=>x.id===saleId),q=+saleQty,pr=+salePrice,total=q*pr,paid=salePaid===""?total:+salePaid;if(!p||!Number.isInteger(q)||q<1||q>p.qty||!Number.isFinite(pr)||pr<0||!Number.isFinite(paid)||paid<0||paid>total){toast("Vérifiez la quantité, le prix et le stock disponible.");return;}const cname=d.customers.find(x=>x.id===saleCustomer)?.name||"Client comptoir";setD(v=>({...v,products:v.products.map(x=>x.id===p.id?{...x,qty:x.qty-q}:x),sales:[{id:uid(),product:p.name,qty:q,price:pr,cost:q*p.cost,total,paid,customer:cname,date:now()},...v.sales],moves:[{id:uid(),product:p.name,qty:q,type:"Vente",date:now()},...v.moves]}));ssaleId("");ssaleQty("1");sprice("");ssalePaid("");toast("Vente validée : stock mis à jour.");}
+function addOrder(e:FormEvent){e.preventDefault();const cname=d.customers.find(x=>x.id===orderCustomer)?.name,total=+orderTotal,paid=orderPaid===""?0:+orderPaid;if(!cname||!orderDesc.trim()||total<=0||paid<0||paid>total){toast("Renseignez un client et des montants valides.");return;}setD(v=>({...v,orders:[{id:uid(),customer:cname,desc:orderDesc,total,paid,status:"En attente",date:now()},...v.orders]}));sorderDesc("");sorderTotal("");sorderPaid("");toast("Commande créée sans réserver le stock.");}
+function exportData(){const a=document.createElement("a"),u=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:"application/json"}));a.href=u;a.download="gestock-sauvegarde.json";a.click();URL.revokeObjectURL(u);}
+const title=NAV.find(x=>x.id===tab)?.label||"Paramètres";
+if(!ready)return <div className="loading-screen">GESTOCK · Chargement…</div>;
+return <div className="app-shell">{mobile&&<button className="scrim" onClick={()=>setMobile(false)}/>}<aside className={"sidebar "+(mobile?"sidebar-open":"")}><div className="brand-row"><b className="brand"><i>G</i> GESTOCK</b><button className="mobile-only icon-btn" onClick={()=>setMobile(false)}><X/></button></div><div className="shop-chip">{d.shop}</div><p className="nav-caption">ESPACE DE TRAVAIL</p><nav>{NAV.map(x=>{const I=x.icon;return <button key={x.id} className={"nav-link "+(tab===x.id?"active":"")} onClick={()=>go(x.id)}><I size={18}/>{x.label}{x.id==="stock"&&low.length>0&&<small>{low.length}</small>}</button>})}</nav><div className="sidebar-bottom"><button className={"nav-link "+(tab==="settings"?"active":"")} onClick={()=>go("settings")}><Settings size={18}/>Paramètres</button><small>Compte de démonstration local</small></div></aside><main className="main-area"><header className="topbar"><div className="top-left"><button className="mobile-only icon-btn" onClick={()=>setMobile(true)}><Menu/></button><span>GESTOCK</span><i>/</i><b>{title}</b></div><span className="saved">● Enregistrement local actif</span></header><div className="page-wrap">{msg&&<div className="toast"><Check size={16}/>{msg}<button onClick={()=>setMsg("")}><X size={15}/></button></div>}
+{tab==="dashboard"&&<><PageHead title="Bonjour, bienvenue" desc={"Le résumé de "+d.shop}/><div className="metric-grid"><Metric label="Chiffre d'affaires" value={money(revenue)} hint="Ventes enregistrées" icon={Wallet}/><Metric label="Montant encaissé" value={money(received)} hint="Paiements reçus" icon={ArrowDownToLine}/><Metric label="Marge brute" value={money(margin)} hint="Après coût d'achat" icon={ChartNoAxesCombined}/><Metric label="Alertes stock" value={String(low.length)} hint="Produits à réapprovisionner" icon={Boxes}/></div><div className="dashboard-grid"><div className="panel"><SectionTitle title="Dernières ventes"/><SalesTable sales={d.sales.slice(0,6)}/></div><div className="panel"><SectionTitle title="Stock à surveiller"/>{low.length?low.map(p=><p key={p.id} className="alert-row">{p.name}<b>{p.qty} restant(s)</b></p>):<Empty icon={Check} title="Tout est en ordre" detail="Aucune alerte de stock."/ >}</div></div><div className="quick-grid"><button onClick={()=>{go("products");spform(true)}}><Plus/> Ajouter un produit</button><button onClick={()=>go("sales")}><ShoppingCart/> Nouvelle vente</button><button onClick={()=>{go("customers")}}><Users/> Gérer les clients</button></div></>}
+{tab==="products"&&<><PageHead title="Produits" desc="Gérez vos références, prix et niveaux de stock." action={<button className="primary-btn" onClick={()=>spform(!pform)}><Plus/> Nouveau produit</button>}/>{pform&&<form className="form-card" onSubmit={addProduct}><SectionTitle title="Créer un produit"/><div className="form-grid"><Field label="Nom *"><input required value={name} onChange={e=>sname(e.target.value)}/></Field><Field label="Référence"><input value={sku} onChange={e=>ssku(e.target.value)}/></Field><Field label="Prix d'achat *"><input required type="number" min="0" value={cost} onChange={e=>scost(e.target.value)}/></Field><Field label="Prix de vente *"><input required type="number" min="0" value={price} onChange={e=>sprice(e.target.value)}/></Field><Field label="Stock initial"><input type="number" min="0" value={qty} onChange={e=>sqty(e.target.value)}/></Field><Field label="Seuil d'alerte"><input type="number" min="0" value={alert} onChange={e=>salert(e.target.value)}/></Field></div><div className="form-actions"><button className="primary-btn">Enregistrer le produit</button></div></form>}<ProductTable products={d.products} adjust={adjust} remove={p=>{if(d.sales.some(s=>s.product===p.name)){toast("Produit conservé dans l'historique.");return;}if(confirm("Supprimer ce produit ?"))setD(v=>({...v,products:v.products.filter(x=>x.id!==p.id)}));}}/></>}
+{tab==="stock"&&<><PageHead title="Gestion du stock" desc="Approvisionnez vos produits et contrôlez les quantités disponibles."/><div className="stat-strip"><Stat label="Références" value={String(d.products.length)}/><Stat label="Unités disponibles" value={String(d.products.reduce((a,x)=>a+x.qty,0))}/><Stat label="Alertes" value={String(low.length)}/></div><form className="form-card" onSubmit={addStock}><SectionTitle title="Nouvelle entrée de stock"/><div className="form-grid"><Field label="Produit"><select required value={stockId} onChange={e=>sstockId(e.target.value)}><option value="">Choisir</option>{d.products.map(p=><option key={p.id} value={p.id}>{p.name} · {p.qty} en stock</option>)}</select></Field><Field label="Quantité reçue"><input required type="number" min="1" value={stockQty} onChange={e=>sstockQty(e.target.value)}/></Field></div><button className="primary-btn"><Plus/> Ajouter au stock</button></form><SectionTitle title="État des stocks"/><ProductTable products={d.products} adjust={adjust} remove={()=>{}}/><SectionTitle title="Historique des mouvements"/><div className="table-wrap"><table><thead><tr><th>Date</th><th>Produit</th><th>Opération</th><th>Quantité</th></tr></thead><tbody>{d.moves.map(m=><tr key={m.id}><td>{new Date(m.date).toLocaleDateString("fr-FR")}</td><td>{m.product}</td><td>{m.type}</td><td>{m.qty}</td></tr>)}</tbody></table></div></>}
+{tab==="sales"&&<><PageHead title="Ventes" desc="Enregistrez une vente : le stock diminue automatiquement."/><form className="form-card" onSubmit={addSale}><SectionTitle title="Nouvelle vente"/><div className="form-grid"><Field label="Produit"><select required value={saleId} onChange={e=>ssaleId(e.target.value)}><option value="">Sélectionner</option>{d.products.filter(p=>p.qty>0).map(p=><option key={p.id} value={p.id}>{p.name} · {p.qty} disponible(s)</option>)}</select></Field><Field label="Quantité"><input required type="number" min="1" value={saleQty} onChange={e=>ssaleQty(e.target.value)}/></Field><Field label="Prix unitaire"><input required type="number" min="0" value={salePrice} onChange={e=>ssalePrice(e.target.value)}/></Field><Field label="Client facultatif"><select value={saleCustomer} onChange={e=>ssaleCustomer(e.target.value)}><option value="">Client comptoir</option>{d.customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field><Field label="Montant encaissé"><input type="number" min="0" value={salePaid} onChange={e=>ssalePaid(e.target.value)} placeholder="Vide = total"/></Field></div>{chosen&&<p className="preview-line">Total : <b>{money(+saleQty*+salePrice)}</b> · Marge estimée : <b>{money(+saleQty*(+salePrice-chosen.cost))}</b></p>}<button className="primary-btn"><Check/> Valider la vente</button></form><SalesTable sales={d.sales}/></>}
+{tab==="margins"&&<><PageHead title="Bénéfices & marges" desc="Suivez la marge brute de vos ventes au coût historique."/><div className="stat-strip"><Stat label="Chiffre d'affaires" value={money(revenue)}/><Stat label="Coût des ventes" value={money(d.sales.reduce((a,x)=>a+x.cost,0))}/><Stat label="Marge brute" value={money(margin)}/><Stat label="Taux de marge" value={revenue?(margin/revenue*100).toFixed(1)+" %":"—"}/></div><p className="notice">La marge brute ne déduit pas les loyers, salaires, transport et autres charges : elle ne représente pas le bénéfice net.</p><SalesTable sales={d.sales}/></>}
+{tab==="customers"&&<><PageHead title="Clients" desc="Conservez les coordonnées de vos clients."/><form className="form-card" onSubmit={addCustomer}><SectionTitle title="Ajouter un client"/><div className="form-grid"><Field label="Nom complet"><input required value={customer} onChange={e=>scustomer(e.target.value)}/></Field><Field label="Téléphone"><input value={phone} onChange={e=>sphone(e.target.value)}/></Field></div><button className="primary-btn"><Plus/> Enregistrer</button></form><div className="table-wrap"><table><thead><tr><th>Client</th><th>Téléphone</th><th>Ventes</th><th>Total acheté</th></tr></thead><tbody>{d.customers.map(c=><tr key={c.id}><td>{c.name}</td><td>{c.phone||"—"}</td><td>{d.sales.filter(s=>s.customer===c.name).length}</td><td>{money(d.sales.filter(s=>s.customer===c.name).reduce((a,s)=>a+s.total,0))}</td></tr>)}</tbody></table></div></>}
+{tab==="orders"&&<><PageHead title="Commandes" desc="Suivez les commandes, acomptes et soldes de vos clients."/><form className="form-card" onSubmit={addOrder}><SectionTitle title="Créer une commande"/><div className="form-grid"><Field label="Client"><select required value={orderCustomer} onChange={e=>sorderCustomer(e.target.value)}><option value="">Choisir un client</option>{d.customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field><Field label="Description"><input required value={orderDesc} onChange={e=>sorderDesc(e.target.value)}/></Field><Field label="Montant total"><input required type="number" min="1" value={orderTotal} onChange={e=>sorderTotal(e.target.value)}/></Field><Field label="Acompte reçu"><input type="number" min="0" value={orderPaid} onChange={e=>sorderPaid(e.target.value)}/></Field></div><button className="primary-btn"><Plus/> Créer la commande</button></form><div className="table-wrap"><table><thead><tr><th>Client</th><th>Description</th><th>Total</th><th>Acompte</th><th>Reste</th><th>Statut</th></tr></thead><tbody>{d.orders.map(o=><tr key={o.id}><td>{o.customer}</td><td>{o.desc}</td><td>{money(o.total)}</td><td>{money(o.paid)}</td><td>{money(o.total-o.paid)}</td><td><select value={o.status} onChange={e=>setD(v=>({...v,orders:v.orders.map(x=>x.id===o.id?{...x,status:e.target.value}:x)}))}>{["En attente","Confirmée","En préparation","Prête","Livrée","Annulée"].map(s=><option key={s}>{s}</option>)}</select></td></tr>)}</tbody></table></div></>}
+{tab==="settings"&&<><PageHead title="Paramètres" desc="Configurez votre boutique et sauvegardez vos données."/><form className="form-card" onSubmit={e=>{e.preventDefault();setD(v=>({...v,shop:shop.trim()||"Ma boutique"}));toast("Nom de boutique enregistré.");}}><Field label="Nom du commerce"><input value={shop} onChange={e=>sshop(e.target.value)}/></Field><p>Devise FCFA (XOF) · Fuseau Africa/Dakar</p><button className="primary-btn">Enregistrer</button></form><div className="panel"><SectionTitle title="Sauvegarde"/><button className="secondary-btn" onClick={exportData}><ArrowDownToLine/> Exporter mes données JSON</button><p className="notice">Les données sont stockées dans le navigateur de cet appareil et ne sont pas encore synchronisées en ligne. Exportez régulièrement une sauvegarde.</p></div></>}
+<footer className="footer"><b>GESTOCK</b><span>La gestion de votre commerce, simplement.</span><span>© 2026</span></footer></div></main></div>;
 }
-
-function DashboardPage() {
-  const [active, setActive] = useState<Section>("dashboard");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const current = nav.find((item) => item.id === active);
-  const go = (section: Section) => { setActive(section); setMenuOpen(false); };
-  return (
-    <div className="app-shell">
-      {menuOpen && <button className="scrim" aria-label="Fermer le menu" onClick={() => setMenuOpen(false)} />}
-      <aside className={`sidebar ${menuOpen ? "sidebar-open" : ""}`}>
-        <div className="sidebar-head">
-          <div className="brand-row"><Brand /><button className="mobile-close" aria-label="Fermer le menu" onClick={() => setMenuOpen(false)}><X size={18} /></button></div>
-          <div className="shop-switch"><span className="shop-avatar">G</span><span className="shop-label"><b>Mon commerce</b><small>Espace principal</small></span><ChevronDown size={15} /></div>
-        </div>
-        <p className="nav-label">MENU PRINCIPAL</p>
-        <nav className="nav-list" aria-label="Navigation principale">
-          {nav.map((item) => { const Icon = item.icon; return <button key={item.id} onClick={() => go(item.id)} className={`nav-link ${active === item.id ? "selected" : ""}`}><Icon size={18} strokeWidth={1.8} /><span>{item.label}</span></button>; })}
-        </nav>
-        <div className="sidebar-foot">
-          <button onClick={() => go("settings")} className={`nav-link ${active === "settings" ? "selected" : ""}`}><Settings size={18} /><span>Paramètres</span></button>
-          <div className="help-card"><span className="help-icon">?</span><span><b>Besoin d'aide ?</b><small>Votre commerce, simplement.</small></span></div>
-          <div className="account-row"><span className="account-avatar">MC</span><span><b>Mon compte</b><small>Administrateur</small></span><ChevronDown size={15} /></div>
-        </div>
-      </aside>
-      <main className="main-area">
-        <header className="topbar">
-          <div className="crumb-wrap"><button className="mobile-menu" aria-label="Ouvrir le menu" onClick={() => setMenuOpen(true)}><Menu size={20} /></button><div className="breadcrumb"><span>GESTOCK</span><i>/</i><b>{active === "dashboard" ? "Vue d'ensemble" : current?.label ?? "Paramètres"}</b></div></div>
-          <div className="top-actions"><span className="currency">FCFA <i>·</i> Dakar</span><button className="bell" aria-label="Notifications"><Bell size={18} /><i /></button><span className="top-divider" /><span className="top-avatar">MC</span></div>
-        </header>
-        <div className="page-wrap">
-          {active === "dashboard" ? <Overview onNavigate={go} /> : <Module section={active} />}
-          <footer className="footer"><b>GESTOCK</b><span>La gestion de votre commerce, en toute simplicité.</span><span>© 2026 GESTOCK</span></footer>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-function Overview({ onNavigate }: { onNavigate: (section: Section) => void }) {
-  return <>
-    <div className="welcome"><div><p className="eyebrow">VOTRE ESPACE DE GESTION</p><h1>Bonjour et bienvenue<span>.</span></h1><p className="subtitle">Tout ce qu'il faut pour garder votre commerce sous contrôle.</p></div><span className="ready-pill"><i /> Espace prêt à configurer</span></div>
-    <section className="metrics">
-      {metrics.map((m) => { const Icon = m.icon; return <article className="metric" key={m.label}><div className="metric-head"><span>{m.label}</span><i><Icon size={17} /></i></div><strong>—</strong><small>{m.hint}</small></article>; })}
-    </section>
-    <div className="dashboard-columns">
-      <section className="panel setup-panel">
-        <div className="panel-title"><div><p className="eyebrow">POUR BIEN DÉMARRER</p><h2>Construisons votre espace</h2><p>Quelques étapes pour commencer à piloter votre activité.</p></div><div className="progress-count"><b>0/4</b><small>étapes</small></div></div>
-        <div className="progress-track"><span /></div>
-        <div className="step-list">{steps.map((step, index) => <button className="step" key={step.no} onClick={() => onNavigate(step.to)}><span className="step-no">{step.no}</span><span className="step-text"><b>{step.title}</b><small>{step.detail}</small></span><span className="step-arrow">{index === 0 ? <ArrowUpRight size={17} /> : <ArrowRight size={17} />}</span></button>)}</div>
-      </section>
-      <section className="panel activity-panel">
-        <div className="panel-title compact"><div><p className="eyebrow">GESTOCK EN UN COUP D'ŒIL</p><h2>Votre activité</h2></div><span className="panel-tag">APERÇU</span></div>
-        <div className="activity-empty"><div className="mini-chart"><span /><span /><span /><i /></div><b>Votre activité prendra forme ici</b><p>Vos ventes, vos marges et les mouvements de stock seront réunis dans un tableau de bord clair.</p></div>
-        <div className="info-note"><i>i</i><span>Aucune donnée fictive : vos indicateurs se rempliront avec vos opérations réelles.</span></div>
-      </section>
-    </div>
-    <section className="quick-section"><div className="quick-heading"><div><p className="eyebrow">VOS OUTILS</p><h2>Accès rapide</h2></div><span>Les essentiels de votre commerce</span></div><div className="quick-grid">
-      <Quick label="Produits" detail="Gérer votre catalogue" icon={Package} tone="green" onClick={() => onNavigate("products")} />
-      <Quick label="Stock" detail="Suivre vos quantités" icon={Boxes} tone="blue" onClick={() => onNavigate("stock")} />
-      <Quick label="Ventes" detail="Consulter vos ventes" icon={ShoppingCart} tone="orange" onClick={() => onNavigate("sales")} />
-      <Quick label="Clients" detail="Retrouver vos clients" icon={Users} tone="purple" onClick={() => onNavigate("customers")} />
-    </div></section>
-  </>;
-}
-
-function Quick({ label, detail, icon: Icon, tone, onClick }: { label: string; detail: string; icon: LucideIcon; tone: string; onClick: () => void }) {
-  return <button className="quick-card" onClick={onClick}><i className={`quick-icon ${tone}`}><Icon size={19} /></i><span><b>{label}</b><small>{detail}</small></span><ArrowUpRight size={16} /></button>;
-}
-
-function Module({ section }: { section: Exclude<Section, "dashboard"> }) {
-  const data = modules[section];
-  const Icon = nav.find((item) => item.id === section)?.icon ?? Package;
-  return <div className="module-page"><div className="module-head"><div><p className="eyebrow">{data.eyebrow}</p><h1>{data.title}<span>.</span></h1><p className="subtitle">{data.description}</p></div><i><Icon size={24} /></i></div><section className="panel empty-panel"><div className="empty-art"><span><Icon size={30} /></span><i /><i /><i /></div><h2>{data.empty}</h2><p>{data.detail}</p><small className="building"><i /> Espace en cours de construction</small></section></div>;
-}
+function PageHead({title,desc,action}:{title:string;desc:string;action?:React.ReactNode}){return <div className="page-head"><div><p className="eyebrow">GESTION COMMERCIALE</p><h1>{title}<i>.</i></h1><p>{desc}</p></div>{action}</div>}
+function Field({label,children}:{label:string;children:React.ReactNode}){return <div className="field"><label>{label}</label>{children}</div>}
+function SectionTitle({title}:{title:string}){return <div className="section-title"><h2>{title}</h2></div>}
+function Metric({label,value,hint,icon:Icon}:{label:string;value:string;hint:string;icon:LucideIcon}){return <div className="metric"><div>{label}<i><Icon size={18}/></i></div><b>{value}</b><small>{hint}</small></div>}
+function Stat({label,value}:{label:string;value:string}){return <div className="stat"><small>{label}</small><b>{value}</b></div>}
+function PageHeadUnused(){}
+function Empty({icon:Icon,title,detail}:{icon:LucideIcon;title:string;detail:string}){return <div className="empty"><Icon size={25}/><b>{title}</b><p>{detail}</p></div>}
+function ProductTable({products,adjust,remove}:{products:P[];adjust:(p:P,n:number)=>void;remove:(p:P)=>void}){return <div className="table-wrap"><table><thead><tr><th>Produit</th><th>Prix achat</th><th>Prix vente</th><th>Stock</th><th>État</th><th>Actions</th></tr></thead><tbody>{products.map(p=><tr key={p.id}><td><b>{p.name}</b><small>{p.sku}</small></td><td>{money(p.cost)}</td><td>{money(p.price)}</td><td>{p.qty}</td><td>{p.qty===0?"Rupture":p.qty<=p.alert?"Stock faible":"Disponible"}</td><td><button onClick={()=>adjust(p,-1)} disabled={p.qty<=0}>−</button> <button onClick={()=>adjust(p,1)}>+</button> <button onClick={()=>remove(p)}><Trash2 size={14}/></button></td></tr>)}</tbody></table>{!products.length&&<Empty icon={Package} title="Aucun produit" detail="Ajoutez votre premier produit."/ >}</div>}
+function SalesTable({sales}:{sales:S[]}){return <div className="table-wrap"><table><thead><tr><th>Produit</th><th>Date</th><th>Client</th><th>Total</th><th>Encaissé</th><th>Reste</th><th>Marge brute</th></tr></thead><tbody>{sales.map(s=><tr key={s.id}><td>{s.product} × {s.qty}</td><td>{new Date(s.date).toLocaleDateString("fr-FR")}</td><td>{s.customer}</td><td>{money(s.total)}</td><td>{money(s.paid)}</td><td>{money(s.total-s.paid)}</td><td>{money(s.total-s.cost)}</td></tr>)}</tbody></table>{!sales.length&&<Empty icon={ShoppingCart} title="Aucune vente" detail="Vos ventes apparaîtront ici."/ >}</div>}
