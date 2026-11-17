@@ -1200,8 +1200,203 @@ export type Database = {
       }
     }
     Functions: {
+      _add_payments: {
+        Args: {
+          _customer: string
+          _kind: string
+          _max: number
+          _order: string
+          _payments: Json
+          _sale: string
+          _shop: string
+        }
+        Returns: number
+      }
+      _apply_movement: {
+        Args: {
+          _article: string
+          _key: string
+          _note: string
+          _qty: number
+          _reason: string
+          _ref_id: string
+          _ref_number: string
+          _ref_type: string
+          _revalue: boolean
+          _shop: string
+          _type: string
+          _unit_cost: number
+        }
+        Returns: number
+      }
+      _assert_can_write: { Args: { _shop: string }; Returns: undefined }
+      _assert_member: { Args: { _shop: string }; Returns: undefined }
+      _insert_article: {
+        Args: {
+          _a: Json
+          _allow_decimal: boolean
+          _is_stocked: boolean
+          _product: string
+          _shop: string
+        }
+        Returns: string
+      }
+      _insert_sale: {
+        Args: {
+          _customer: string
+          _global_discount: number
+          _key: string
+          _note: string
+          _order: string
+          _resolved: Json
+          _shop: string
+          _tier: string
+        }
+        Returns: string
+      }
+      _next_number: { Args: { _shop: string; _type: string }; Returns: string }
+      _next_sku: { Args: { _shop: string }; Returns: string }
+      _refresh_order: { Args: { _order: string }; Returns: undefined }
+      _refresh_sale: { Args: { _sale: string }; Returns: undefined }
+      _resolve_lines: {
+        Args: { _lines: Json; _shop: string; _tier: string }
+        Returns: Json
+      }
+      _shop_tz: { Args: { _shop: string }; Returns: string }
+      add_article: {
+        Args: { _payload: Json; _product: string; _shop: string }
+        Returns: string
+      }
+      add_order_deposit: {
+        Args: {
+          _amount: number
+          _method: string
+          _operation_key: string
+          _order: string
+          _shop: string
+        }
+        Returns: string
+      }
+      adjust_stock: {
+        Args: {
+          _article: string
+          _note: string
+          _operation_key: string
+          _quantity: number
+          _reason: string
+          _shop: string
+        }
+        Returns: string
+      }
       can_write_shop: { Args: { _shop: string }; Returns: boolean }
+      cancel_order: {
+        Args: {
+          _deposit_action: string
+          _order: string
+          _reason: string
+          _shop: string
+        }
+        Returns: undefined
+      }
+      cancel_sale: {
+        Args: { _reason: string; _sale: string; _shop: string }
+        Returns: undefined
+      }
+      create_order: {
+        Args: {
+          _customer_id: string
+          _deposit: Json
+          _expected_date: string
+          _lines: Json
+          _note: string
+          _operation_key: string
+          _price_tier: string
+          _shop: string
+        }
+        Returns: string
+      }
+      create_product: {
+        Args: { _payload: Json; _shop: string }
+        Returns: string
+      }
+      create_sale: {
+        Args: {
+          _customer_id: string
+          _global_discount: number
+          _lines: Json
+          _note: string
+          _operation_key: string
+          _payments: Json
+          _price_tier: string
+          _shop: string
+        }
+        Returns: string
+      }
+      create_shop: {
+        Args: {
+          _address: string
+          _city: string
+          _name: string
+          _phone: string
+          _sector: string
+        }
+        Returns: string
+      }
+      delete_product: {
+        Args: { _product: string; _shop: string }
+        Returns: undefined
+      }
+      deliver_order: {
+        Args: {
+          _operation_key: string
+          _order: string
+          _payments: Json
+          _shop: string
+        }
+        Returns: string
+      }
+      get_dashboard: { Args: { _shop: string }; Returns: Json }
+      get_period_report: {
+        Args: { _from: string; _shop: string; _to: string }
+        Returns: Json
+      }
       is_shop_member: { Args: { _shop: string }; Returns: boolean }
+      record_purchase: {
+        Args: {
+          _lines: Json
+          _note: string
+          _operation_key: string
+          _received_at: string
+          _shop: string
+          _supplier: string
+        }
+        Returns: string
+      }
+      record_sale_payment: {
+        Args: {
+          _amount: number
+          _method: string
+          _note: string
+          _operation_key: string
+          _sale: string
+          _shop: string
+        }
+        Returns: string
+      }
+      set_order_status: {
+        Args: { _order: string; _shop: string; _status: string }
+        Returns: undefined
+      }
+      settle_customer: {
+        Args: {
+          _amount: number
+          _customer: string
+          _method: string
+          _operation_key: string
+          _shop: string
+        }
+        Returns: number
+      }
       shop_is_writable: { Args: { _shop: string }; Returns: boolean }
     }
     Enums: {
