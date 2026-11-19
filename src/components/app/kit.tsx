@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Tone } from "@/lib/labels";
 
-export function PageHeader({ title, description, actions, eyebrow }: { title: string; description?: string; actions?: ReactNode; eyebrow?: string }) {
+export function PageHeader({ title, description, actions, eyebrow }: { title: string; description?: string | undefined; actions?: ReactNode | undefined; eyebrow?: string | undefined }) {
   return (
     <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
@@ -19,7 +19,7 @@ export function PageHeader({ title, description, actions, eyebrow }: { title: st
 }
 
 export function Panel({ title, description, actions, children, className, bodyClassName }: {
-  title?: string; description?: string; actions?: ReactNode; children: ReactNode; className?: string; bodyClassName?: string;
+  title?: string | undefined; description?: string | undefined; actions?: ReactNode | undefined; children: ReactNode; className?: string | undefined; bodyClassName?: string | undefined;
 }) {
   return (
     <section className={cn("rounded-2xl border border-border bg-card shadow-soft", className)}>
@@ -38,7 +38,7 @@ export function Panel({ title, description, actions, children, className, bodyCl
 }
 
 export function StatCard({ label, value, hint, icon: Icon, tone = "default", trend }: {
-  label: string; value: ReactNode; hint?: ReactNode; icon?: LucideIcon; tone?: "default" | "brand" | "dark"; trend?: number | null;
+  label: string; value: ReactNode; hint?: ReactNode | undefined; icon?: LucideIcon | undefined; tone?: "default" | "brand" | "dark" | undefined; trend?: number | null | undefined;
 }) {
   return (
     <div
@@ -73,7 +73,7 @@ export function StatCard({ label, value, hint, icon: Icon, tone = "default", tre
   );
 }
 
-export function EmptyState({ icon: Icon, title, description, action }: { icon: LucideIcon; title: string; description: string; action?: ReactNode }) {
+export function EmptyState({ icon: Icon, title, description, action }: { icon: LucideIcon; title: string; description: string; action?: ReactNode | undefined }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
       <div className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-brand-foreground">
@@ -86,7 +86,7 @@ export function EmptyState({ icon: Icon, title, description, action }: { icon: L
   );
 }
 
-export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
+export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: (() => void) | undefined }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
       <div className="mb-3 inline-flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
@@ -103,7 +103,7 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
   );
 }
 
-export function LoadingRows({ rows = 5 }: { rows?: number }) {
+export function LoadingRows({ rows = 5 }: { rows?: number | undefined }) {
   return (
     <div className="space-y-3 p-1" aria-busy="true" aria-label="Chargement">
       {Array.from({ length: rows }).map((_, i) => (
@@ -122,7 +122,7 @@ const toneClass: Record<Tone, string> = {
   warning: "bg-warning/18 text-warning-foreground",
 };
 
-export function Badge({ tone = "muted", children, className }: { tone?: Tone; children: ReactNode; className?: string }) {
+export function Badge({ tone = "muted", children, className }: { tone?: Tone | undefined; children: ReactNode; className?: string | undefined }) {
   return (
     <span className={cn("inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.72rem] font-medium", toneClass[tone], className)}>
       {children}
@@ -148,14 +148,14 @@ export function DataTable({ head, children }: { head: ReactNode; children: React
   );
 }
 
-export function Th({ children, className }: { children?: ReactNode; className?: string }) {
+export function Th({ children, className }: { children?: ReactNode | undefined; className?: string | undefined }) {
   return <th className={cn("px-3 py-3 font-medium first:pl-0 last:pr-0", className)}>{children}</th>;
 }
-export function Td({ children, className }: { children?: ReactNode; className?: string }) {
+export function Td({ children, className }: { children?: ReactNode | undefined; className?: string | undefined }) {
   return <td className={cn("px-3 py-3.5 align-middle first:pl-0 last:pr-0", className)}>{children}</td>;
 }
 
-export function FieldError({ children }: { children?: ReactNode }) {
+export function FieldError({ children }: { children?: ReactNode | undefined }) {
   if (!children) return null;
   return <p className="text-xs text-destructive">{children}</p>;
 }

@@ -13,6 +13,7 @@ import { Logo } from "@/components/brand/Logo";
 import { rpc } from "@/lib/rpc";
 import { SECTORS } from "@/lib/labels";
 import { shopQuery } from "@/lib/shop-query";
+import { zodErrors, type FormErrors } from "@/lib/validation";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   beforeLoad: async ({ context }) => {
@@ -42,18 +43,14 @@ function Onboarding() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<FormErrors<"name" | "sector" | "city" | "phone" | "address">>({});
   const [form, setForm] = useState({ name: "", sector: "", city: "Dakar", phone: "", address: "" });
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (busy) return;
     const parsed = schema.safeParse(form);
-    if (!parsed.success) {
-      const errs: Record<string, string> = {};
-      for (const i of parsed.error.issues) errs[String(i.path[0])] = i.message;
-      return setErrors(errs);
-    }
+    if (!parsed.success) return setErrors(zodErrors(parsed.error));
     setBusy(true);
     try {
       await rpc("create_shop", {

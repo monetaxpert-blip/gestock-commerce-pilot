@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
@@ -10,12 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/brand/Logo";
 import { GoogleButton } from "@/components/app/GoogleButton";
 import { friendlyError } from "@/lib/rpc";
+import { zodErrors, type FormErrors } from "@/lib/validation";
 
 type Mode = "signin" | "signup" | "forgot";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>): { mode?: Mode } => ({
-    mode: s.mode === "signup" || s.mode === "forgot" ? (s.mode as Mode) : undefined,
+  validateSearch: (s: Record<string, unknown>): { mode?: Mode | undefined } => ({
+    mode: s["mode"] === "signup" || s["mode"] === "forgot" ? (s["mode"] as Mode) : undefined,
   }),
   head: () => ({
     meta: [
@@ -56,7 +57,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>(search.mode ?? "signin");
   const [busy, setBusy] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<FormErrors<"fullName" | "phone" | "email" | "password">>({});
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [form, setForm] = useState({ fullName: "", phone: "", email: "", password: "" });
 
@@ -70,7 +71,7 @@ function AuthPage() {
     return () => data.subscription.unsubscribe();
   }, [navigate]);
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
     setErrors((er) => ({ ...er, [k]: "" }));
   };
@@ -81,7 +82,7 @@ function AuthPage() {
     setErrors({});
     if (mode === "forgot") {
       const parsed = z.string().trim().email("Adresse e-mail invalide").safeParse(form.email);
-      if (!parsed.success) return setErrors({ email: parsed.error.issues[0].message });
+      if (!parsed.success) return setErrors({ email: parsed.error.issues[0]?.message ?? "Adresse e-mail invalide" });
       setBusy(true);
       const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -93,11 +94,7 @@ function AuthPage() {
     }
     const schema = mode === "signin" ? signInSchema : signUpSchema;
     const parsed = schema.safeParse(form);
-    if (!parsed.success) {
-      const errs: Record<string, string> = {};
-      for (const issue of parsed.error.issues) errs[String(issue.path[0])] = issue.message;
-      return setErrors(errs);
-    }
+    if (!parsed.success) return setErrors(zodErrors(parsed.error));
     setBusy(true);
     if (mode === "signin") {
       const { error } = await supabase.auth.signInWithPassword({ email: form.email.trim(), password: form.password });
@@ -278,7 +275,7 @@ function AuthPage() {
   );
 }
 
-function Field({ label, error, aside, children }: { label: string; error?: string; aside?: React.ReactNode; children: React.ReactNode }) {
+function Field({ label, error, aside, children }: { label: string; error?: string | undefined; aside?: ReactNode; children: ReactNode }) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
