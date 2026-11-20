@@ -14,7 +14,9 @@ import { useShop } from "@/lib/shop";
 export function CategoriesDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { shop, access } = useShop();
   const qc = useQueryClient();
-  const { data = [], isLoading } = useQuery(categoriesQuery(shop.id));
+  const q = useQuery(categoriesQuery(shop.id));
+  const data = q.data ?? [];
+  const isLoading = q.isLoading;
   const [name, setName] = useState("");
   const [parent, setParent] = useState("none");
   const [busy, setBusy] = useState(false);
@@ -22,8 +24,8 @@ export function CategoriesDialog({ open, onOpenChange }: { open: boolean; onOpen
 
   async function add() {
     const n = name.trim();
-    if (!n) return toast.error("Indiquez un nom de catégorie.");
-    if (n.length > 60) return toast.error("60 caractères maximum.");
+    if (!n) { toast.error("Indiquez un nom de catégorie."); return; }
+    if (n.length > 60) { toast.error("60 caractères maximum."); return; }
     setBusy(true);
     try {
       must(await supabase.from("categories").insert({ shop_id: shop.id, name: n, parent_id: parent === "none" ? null : parent }).select().single());

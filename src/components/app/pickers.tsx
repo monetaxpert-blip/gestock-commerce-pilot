@@ -206,7 +206,7 @@ export function CustomerFormDialog({ open, onOpenChange, onSaved, customer }: {
         : must(await supabase.from("customers").insert({ ...payload, shop_id: shop.id }).select().single());
       await qc.invalidateQueries({ queryKey: ["customers"] });
       toast.success(customer ? "Client mis à jour." : "Client ajouté.");
-      onSaved?.(saved);
+      if (saved) onSaved?.(saved);
       onOpenChange(false);
     } catch (err) {
       const msg = (err as Error).message;

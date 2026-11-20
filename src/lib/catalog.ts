@@ -38,7 +38,7 @@ export function articlesQuery(shopId: string) {
       const rows = must(
         await supabase.from("article_stock").select("*").eq("shop_id", shopId).order("product_name").order("variant_name").limit(5000),
       );
-      return rows.map((r) => ({
+      return (rows ?? []).map((r) => ({
         id: r.id ?? "",
         product_id: r.product_id ?? "",
         product_name: r.product_name ?? "",
