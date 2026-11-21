@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -397,7 +397,7 @@ function DashboardPreview() {
               <div className="landing-chart-panel">
                 <div className="landing-panel-heading"><div><b>Évolution des ventes</b><small>Illustration de la visualisation</small></div><span>12 périodes</span></div>
                 <div className="landing-chart">
-                  {SAMPLE_BARS.map((height, index) => <span key={index} style={{ "--bar-height": \`\${height}%\`, "--bar-index": index } as React.CSSProperties}><i /></span>)}
+                  {SAMPLE_BARS.map((height, index) => <span key={index} style={{ "--bar-height": \`\${height}%\`, "--bar-index": index } as CSSProperties}><i /></span>)}
                 </div>
                 <div className="landing-chart-labels"><span>Début</span><span>Évolution</span><span>Fin</span></div>
               </div>
