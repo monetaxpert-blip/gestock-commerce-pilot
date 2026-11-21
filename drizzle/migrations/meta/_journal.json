@@ -15,6 +15,13 @@
       "when": 1794914678437,
       "tag": "0001_gestock_business_operations",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795293600000,
+      "tag": "0002_settle_customer_allocation_guard",
+      "breakpoints": true
     }
   ]
 }
