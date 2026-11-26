@@ -752,3 +752,76 @@
   .landing-dashboard-sidebar { display: none; }
   .landing-dashboard-main { min-width: 0; }
 }
+
+
+/* Responsive landing header and hero for iPhone and compact viewports. */
+.landing-header-inner { position: relative; }
+.landing-mobile-menu-toggle {
+  display: none;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(220,237,222,.18);
+  border-radius: 10px;
+  background: rgba(255,255,255,.045);
+  color: #edf5ed;
+  cursor: pointer;
+}
+.landing-mobile-menu-toggle svg { width: 19px; height: 19px; }
+@media (max-width: 1100px) {
+  .landing-header-inner { gap: 12px; }
+  .landing-nav-links { display: none; }
+  .landing-mobile-menu-toggle { display: inline-flex; }
+  .landing-nav-links.is-open {
+    position: absolute;
+    top: calc(100% + 9px);
+    right: 0;
+    left: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px;
+    border: 1px solid rgba(220,237,222,.15);
+    border-radius: 14px;
+    background: rgba(11,23,18,.97);
+    box-shadow: 0 18px 45px rgba(0,0,0,.35);
+    backdrop-filter: blur(18px);
+  }
+  .landing-nav-links.is-open a {
+    padding: 13px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .landing-nav-links.is-open a:hover { background: rgba(255,255,255,.06); }
+  .landing-hero {
+    width: min(100% - 40px, 760px);
+    min-height: auto;
+    padding: 66px 0 62px;
+    grid-template-columns: minmax(0,1fr);
+    gap: 48px;
+  }
+  .landing-hero-copy { max-width: 680px; }
+  .landing-hero h1 { max-width: 680px; font-size: clamp(46px, 8vw, 68px); }
+  .landing-hero-visual { width: min(100%, 650px); margin: 0 auto; }
+  .landing-dashboard-wrap { transform: none; }
+}
+@media (max-width: 560px) {
+  .landing-header-inner { width: calc(100% - 24px); min-height: 64px; gap: 7px; }
+  .landing-header-inner .landing-brand { min-width: 0; }
+  .landing-header-inner .landing-brand img { width: auto; max-width: 104px; }
+  .landing-header-actions { margin-left: auto; gap: 2px; }
+  .landing-header-actions .landing-login { min-height: 36px; padding: 0 7px; font-size: 10px; }
+  .landing-header-actions .landing-nav-cta { min-height: 36px; padding: 0 8px; font-size: 9px; white-space: nowrap; }
+  .landing-mobile-menu-toggle { width: 34px; height: 36px; }
+  .landing-hero { width: calc(100% - 36px); padding: 52px 0 48px; gap: 40px; }
+  .landing-eyebrow { max-width: 100%; white-space: normal; }
+  .landing-hero h1 { font-size: clamp(42px, 11.5vw, 54px); line-height: 1.02; overflow-wrap: normal; }
+  .landing-hero-visual { width: 100%; }
+  .landing-dashboard-wrap, .landing-dashboard-window { width: 100%; min-width: 0; }
+  .landing-float-stock { left: 0; }
+  .landing-float-margin { right: 0; }
+}
