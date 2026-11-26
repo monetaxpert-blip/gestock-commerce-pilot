@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/brand/Logo";
 import { GoogleButton } from "@/components/app/GoogleButton";
 import { friendlyError } from "@/lib/rpc";
+import { signInWithApple } from "@/lib/google-auth";
 import { zodErrors, type FormErrors } from "@/lib/validation";
 
 type Mode = "signin" | "signup" | "forgot";
@@ -204,8 +205,11 @@ function AuthPage() {
                     <button type="button" onClick={async () => {
                       if (busy) return;
                       setBusy(true);
-                      const { error } = await supabase.auth.signInWithOAuth({ provider: "apple", options: { redirectTo: `${window.location.origin}/auth` } });
-                      if (error) { setBusy(false); toast.error("La connexion Apple n'est pas encore configurée. Réessayez plus tard."); }
+                      const result = await signInWithApple();
+                      if (result.error) {
+                        setBusy(false);
+                        toast.error(result.error.message || "La connexion avec Apple a échoué. Réessayez.");
+                      }
                     }} disabled={busy} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-foreground px-3 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-60">
                       <Apple className="size-[18px]" /> Continuer avec Apple
                     </button>
