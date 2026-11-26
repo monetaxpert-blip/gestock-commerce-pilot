@@ -101,23 +101,40 @@ function AuthPage() {
       navigate({ to: "/app", replace: true });
     } else {
       const d = parsed.data as z.infer<typeof signUpSchema>;
-      const { data, error } = await supabase.auth.signUp({
-        email: d.email.trim().toLowerCase(),
-        password: d.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth`,
-          data: { full_name: d.fullName, phone: d.phone?.trim() || null },
-        },
-      });
-      setBusy(false);
-      if (error) return toast.error(translateAuthError(error.message));
-      if (data.session) {
-        toast.success("Votre compte GESTOCK est créé.");
-        navigate({ to: "/app", replace: true });
-        return;
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: d.email.trim().toLowerCase(),
+          password: d.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth`,
+            data: { full_name: d.fullName, phone: d.phone?.trim() || null },
+          },
+        });
+        if (error) {
+          setBusy(false);
+          return toast.error(translateAuthError(error.message));
+        }
+        // Supabase may intentionally return an empty identities array for an
+        // address that already has an account, without exposing a signup error.
+        if (data.user && data.user.identities?.length === 0) {
+          setBusy(false);
+          setMode("signin");
+          setForm((current) => ({ ...current, identifier: d.email.trim().toLowerCase() }));
+          return toast.error("Un compte existe déjà avec cette adresse. Connectez-vous ou réinitialisez votre mot de passe.");
+        }
+        if (data.session) {
+          setBusy(false);
+          toast.success("Votre compte GESTOCK est créé.");
+          navigate({ to: "/app", replace: true });
+          return;
+        }
+        setBusy(false);
+        setSentTo(d.email.trim().toLowerCase());
+        toast.success("Votre compte est créé. Consultez votre boîte e-mail pour confirmer votre adresse.");
+      } catch (error) {
+        setBusy(false);
+        toast.error(translateAuthError(error instanceof Error ? error.message : "Connexion impossible. Vérifiez votre connexion Internet puis réessayez."));
       }
-      setSentTo(d.email.trim().toLowerCase());
-      toast.success("Consultez votre boîte e-mail si une confirmation est demandée.");
     }
   }
 
