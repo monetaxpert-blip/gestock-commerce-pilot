@@ -34,7 +34,7 @@ function StockPage() {
     return matches && (filter === "all" || state === filter);
   });
   return <>
-    <PageHeader title="Stock" description="Quantités disponibles, niveaux d'alerte et valeur estimée au coût d'achat." actions={<Button variant="outline" asChild><Link to="/app/produits">Voir le catalogue</Link></Button>} />
+    <PageHeader title="Stock" description="Quantités disponibles, niveaux d'alerte et valeur estimée au coût d'achat." actions={<><Button variant="outline" asChild><Link to="/app/produits">Voir le catalogue</Link></Button><Button asChild><Link to="/app/stock/approvisionnements/nouveau">Approvisionner</Link></Button></>} />
     <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard label="Références suivies" value={stats.lines} icon={Package} hint="Articles actifs avec suivi de stock" />
       <StatCard label="Stock faible" value={stats.low} icon={AlertTriangle} tone={stats.low ? "brand" : "default"} hint="Au seuil ou en dessous" />
