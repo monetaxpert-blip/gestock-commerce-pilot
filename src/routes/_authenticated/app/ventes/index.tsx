@@ -23,7 +23,7 @@ function SalesPage(){
  const active=rows.filter(s=>s.status!=="cancelled");
  const total=active.reduce((n,s)=>n+Number(s.total),0),margin=active.reduce((n,s)=>n+Number(s.margin),0);
  return <>
- <PageHeader title="Ventes" description="Historique des ventes et état des règlements. Les ventes annulées restent visibles pour la traçabilité."/>
+ <PageHeader title="Ventes" description="Historique des ventes et état des règlements. Les ventes annulées restent visibles pour la traçabilité." actions={<Button asChild><Link to="/app/ventes/caisse">Nouvelle vente</Link></Button>}/>
  <div className="mb-5 grid gap-3 sm:grid-cols-3"><StatCard label="Ventes enregistrées" value={rows.length} icon={ShoppingBag} hint="Toutes les opérations, annulations incluses"/><StatCard label="Total des ventes actives" value={money(total)} icon={Wallet} tone="brand" hint="Hors ventes annulées"/><StatCard label="Marge brute cumulée" value={money(margin)} icon={Wallet} hint="Marge enregistrée sur ventes actives"/></div>
  <Panel><div className="mb-4 relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input className="pl-9" placeholder="Rechercher par numéro ou client" value={search} onChange={e=>setSearch(e.target.value)}/></div>
  {salesQ.error?<ErrorState error={salesQ.error} onRetry={()=>salesQ.refetch()}/>:salesQ.isLoading||clientsQ.isLoading?<LoadingRows/>:rows.length===0?<EmptyState icon={ShoppingBag} title="Aucune vente enregistrée" description="Vos ventes apparaîtront ici après leur enregistrement dans la caisse."/>:filtered.length===0?<p className="py-8 text-center text-sm text-muted-foreground">Aucun résultat trouvé.</p>:
