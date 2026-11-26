@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, MailCheck, Smartphone, Apple } from "lucide-react";
+import { ArrowLeft, Loader2, MailCheck, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,15 +30,12 @@ export const Route = createFileRoute("/auth")({
 });
 
 const signInSchema = z.object({
-  identifier: z.string().trim().min(1, "Saisissez votre e-mail ou numéro de téléphone").max(255),
+  identifier: z.string().trim().email("Adresse e-mail invalide").max(255),
   password: z.string().min(1, "Saisissez votre mot de passe"),
 });
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Indiquez votre nom").max(120),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^\+?[0-9\s]{8,20}$/, "Numéro de téléphone invalide"),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
   email: z.string().trim().email("Adresse e-mail invalide").max(255),
   password: z.string().min(8, "8 caractères minimum").max(72),
 });
@@ -59,11 +56,7 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<FormErrors<"fullName" | "phone" | "email" | "identifier" | "password">>({});
   const [sentTo, setSentTo] = useState<string | null>(null);
-  const [pendingPhone, setPendingPhone] = useState<string | null>(null);
-  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
-  const [otp, setOtp] = useState("");
   const [form, setForm] = useState({ fullName: "", phone: "", email: "", identifier: "", password: "" });
-  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -84,25 +77,6 @@ function AuthPage() {
     e.preventDefault();
     if (busy) return;
     setErrors({});
-    if (pendingPhone) {
-      if (!/^\\d{6}$/.test(otp.trim())) return toast.error("Saisissez le code SMS à 6 chiffres.");
-      setBusy(true);
-      const { error } = await supabase.auth.verifyOtp({ phone: pendingPhone, token: otp.trim(), type: "sms" });
-      if (error) {
-        setBusy(false);
-        return toast.error(translateAuthError(error.message));
-      }
-      if (pendingEmail) {
-        const { error: emailError } = await supabase.auth.updateUser({ email: pendingEmail });
-        if (emailError) toast.info("Votre téléphone est confirmé. Vous pourrez ajouter ou confirmer votre e-mail depuis votre espace.");
-        else toast.success("Téléphone confirmé. Un lien de confirmation a été envoyé à votre adresse e-mail.");
-      }
-      setBusy(false);
-      setPendingPhone(null);
-      setPendingEmail(null);
-      navigate({ to: "/app", replace: true });
-      return;
-    }
     if (mode === "forgot") {
       const parsed = z.string().trim().email("Adresse e-mail invalide").safeParse(form.email);
       if (!parsed.success) return setErrors({ email: parsed.error.issues[0]?.message ?? "Adresse e-mail invalide" });
@@ -120,41 +94,29 @@ function AuthPage() {
     if (!parsed.success) return setErrors(zodErrors(parsed.error));
     setBusy(true);
     if (mode === "signin") {
-      const identifier = form.identifier.trim();
-      const isPhone = loginMethod === "phone";
-      const phone = identifier.replace(/[\s().-]/g, "");
-      const normalizedPhone = /^0[0-9]{9}$/.test(phone) ? `+221${phone.slice(1)}` : /^7[0-9]{8}$/.test(phone) ? `+221${phone}` : phone;
-      const { error } = await supabase.auth.signInWithPassword(
-        isPhone ? { phone: normalizedPhone, password: form.password } : { email: identifier, password: form.password },
-      );
+      const { error } = await supabase.auth.signInWithPassword({ email: form.identifier.trim().toLowerCase(), password: form.password });
       setBusy(false);
       if (error) return toast.error(translateAuthError(error.message));
       navigate({ to: "/app", replace: true });
     } else {
       const d = parsed.data as z.infer<typeof signUpSchema>;
-      const rawPhone = d.phone.replace(/[\\s().-]/g, "");
-      const normalizedPhone = /^0[0-9]{9}$/.test(rawPhone)
-        ? `+221${rawPhone.slice(1)}`
-        : /^7[0-9]{8}$/.test(rawPhone)
-          ? `+221${rawPhone}`
-          : rawPhone.startsWith("221")
-            ? `+${rawPhone}`
-            : rawPhone;
       const { data, error } = await supabase.auth.signUp({
-        phone: normalizedPhone,
+        email: d.email.trim().toLowerCase(),
         password: d.password,
-        options: { data: { full_name: d.fullName, email: d.email } },
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth`,
+          data: { full_name: d.fullName, phone: d.phone?.trim() || null },
+        },
       });
       setBusy(false);
       if (error) return toast.error(translateAuthError(error.message));
       if (data.session) {
-        await supabase.auth.signOut();
-        return toast.error("La confirmation SMS doit être activée avant d'autoriser les inscriptions par téléphone. Réessayez après configuration.");
+        toast.success("Votre compte GESTOCK est créé.");
+        navigate({ to: "/app", replace: true });
+        return;
       }
-      setPendingPhone(normalizedPhone);
-      setPendingEmail(d.email);
-      setOtp("");
-      toast.success("Code de vérification envoyé par SMS.");
+      setSentTo(d.email.trim().toLowerCase());
+      toast.success("Consultez votre boîte e-mail si une confirmation est demandée.");
     }
   }
 
@@ -205,39 +167,7 @@ function AuthPage() {
             </Link>
           </div>
 
-          {pendingPhone ? (
-            <div className="rounded-2xl border border-border bg-card p-7 shadow-soft">
-              <div className="mb-4 inline-flex size-11 items-center justify-center rounded-full bg-brand-soft text-brand-foreground">
-                <Smartphone className="size-5" />
-              </div>
-              <h1 className="text-2xl font-semibold">Confirmez votre téléphone</h1>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Saisissez le code à 6 chiffres envoyé par SMS au <span className="font-medium text-foreground">{pendingPhone}</span>.
-                Cette vérification est demandée une seule fois à l'inscription.
-              </p>
-              <form onSubmit={onSubmit} className="mt-6 space-y-4">
-                <Field label="Code de vérification">
-                  <Input value={otp} onChange={(e) => setOtp(e.target.value.replace(/\\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000" />
-                </Field>
-                <Button type="submit" className="h-11 w-full" disabled={busy || otp.length !== 6}>
-                  {busy && <Loader2 className="animate-spin" />}
-                  Vérifier et créer mon compte
-                </Button>
-              </form>
-              <button type="button" disabled={busy} onClick={async () => {
-                setBusy(true);
-                const { error } = await supabase.auth.resend({ type: "sms", phone: pendingPhone });
-                setBusy(false);
-                if (error) toast.error(translateAuthError(error.message));
-                else toast.success("Un nouveau code vient d'être envoyé.");
-              }} className="mt-4 w-full text-center text-sm font-medium text-foreground underline-offset-4 hover:underline disabled:opacity-50">
-                Renvoyer le code
-              </button>
-              <button type="button" onClick={() => { setPendingPhone(null); setPendingEmail(null); setOtp(""); }} className="mt-3 w-full text-center text-sm text-muted-foreground hover:text-foreground">
-                Annuler l'inscription
-              </button>
-            </div>
-          ) : sentTo ? (
+          {sentTo ? (
             <div className="rounded-2xl border border-border bg-card p-7 shadow-soft">
               <div className="mb-4 inline-flex size-11 items-center justify-center rounded-full bg-brand-soft text-brand-foreground">
                 <MailCheck className="size-5" />
@@ -294,21 +224,16 @@ function AuthPage() {
                     <Field label="Nom complet" error={errors.fullName}>
                       <Input value={form.fullName} onChange={set("fullName")} autoComplete="name" placeholder="Awa Ndiaye" />
                     </Field>
-                    <Field label="Téléphone" error={errors.phone}>
+                    <Field label="Téléphone (facultatif)" error={errors.phone}>
                       <Input value={form.phone} onChange={set("phone")} autoComplete="tel" inputMode="tel" placeholder="77 123 45 67" />
                     </Field>
                   </div>
                 )}
                 {mode === "signin" ? (
                   <>
-                    <div className="grid grid-cols-2 rounded-xl bg-muted p-1">
-                      <button type="button" onClick={() => { setLoginMethod("email"); setForm((f) => ({ ...f, identifier: "" })); }} className={`min-h-10 rounded-lg text-sm font-medium transition ${loginMethod === "email" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>E-mail</button>
-                      <button type="button" onClick={() => { setLoginMethod("phone"); setForm((f) => ({ ...f, identifier: "" })); }} className={`min-h-10 rounded-lg text-sm font-medium transition ${loginMethod === "phone" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}><Smartphone className="mr-1 inline size-4" />Téléphone</button>
-                    </div>
-                    <Field label={loginMethod === "email" ? "Adresse e-mail" : "Numéro de téléphone"} error={errors.identifier}>
-                      <Input type={loginMethod === "email" ? "email" : "tel"} inputMode={loginMethod === "email" ? "email" : "tel"} value={form.identifier} onChange={set("identifier")} autoComplete={loginMethod === "email" ? "username" : "tel"} placeholder={loginMethod === "email" ? "vous@exemple.com" : "+221 77 123 45 67"} />
+                    <Field label="Adresse e-mail" error={errors.identifier}>
+                      <Input type="email" inputMode="email" value={form.identifier} onChange={set("identifier")} autoComplete="username" placeholder="vous@exemple.com" />
                     </Field>
-                    {loginMethod === "phone" && <p className="text-xs leading-relaxed text-muted-foreground">Connexion sans SMS pour les numéros déjà associés et confirmés à un compte GESTOCK.</p>}
                   </>
                 ) : (
                   <Field label="Adresse e-mail" error={errors.email}>
