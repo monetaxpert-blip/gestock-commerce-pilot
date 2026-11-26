@@ -98,6 +98,18 @@ const SAMPLE_BARS = [32, 48, 39, 61, 52, 73, 57, 82, 68, 92, 76, 100];
 
 function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1100px)");
+    const update = () => {
+      setIsMobileViewport(media.matches);
+      if (!media.matches) setMobileMenuOpen(false);
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
@@ -131,12 +143,12 @@ function Landing() {
         <div className="landing-orb landing-orb-two" aria-hidden="true" />
         <div className="landing-grid" aria-hidden="true" />
 
-        <header className="landing-header">
-          <div className="landing-header-inner">
+        <header className="landing-header" style={{ position: "relative", zIndex: 100 }}>
+          <div className="landing-header-inner" style={isMobileViewport ? { display: "flex", flexWrap: "nowrap", alignItems: "center", justifyContent: "space-between", width: "calc(100% - 28px)", minHeight: 68, gap: 8 } : undefined}>
             <Link to="/" aria-label="GESTOCK, accueil" className="landing-brand">
               <Logo />
             </Link>
-            <nav className={`landing-nav-links${mobileMenuOpen ? " is-open" : ""}`} aria-label="Navigation principale">
+            <nav className={`landing-nav-links${mobileMenuOpen ? " is-open" : ""}`} aria-label="Navigation principale" style={isMobileViewport ? { display: mobileMenuOpen ? "flex" : "none", position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, width: "100%", maxWidth: "100%", flexDirection: "column", alignItems: "stretch", gap: 0, padding: 16, borderRadius: 16, background: "#142420", border: "1px solid rgba(255,255,255,.12)", boxShadow: "0 18px 40px rgba(0,0,0,.35)", zIndex: 200 } : undefined}>
               <a href="#fonctionnalites" onClick={() => setMobileMenuOpen(false)}>Fonctionnalités</a>
               <a href="#comment-ca-marche" onClick={() => setMobileMenuOpen(false)}>Comment ça marche</a>
               <a href="#faq" onClick={() => setMobileMenuOpen(false)}>Questions fréquentes</a>
@@ -144,17 +156,18 @@ function Landing() {
             <button
               type="button"
               className="landing-mobile-menu-toggle"
+              style={isMobileViewport ? { display: "inline-flex", flex: "0 0 40px", width: 40, height: 40, alignItems: "center", justifyContent: "center" } : { display: "none" }}
               aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
               aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen((open) => !open)}
             >
               {mobileMenuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
             </button>
-            <div className="landing-header-actions">
-              <Button variant="ghost" className="landing-login" asChild>
+            <div className="landing-header-actions" style={isMobileViewport ? { display: "flex", flex: "0 0 auto", marginLeft: "auto", alignItems: "center", gap: 6 } : undefined}>
+              <Button variant="ghost" className="landing-login" style={isMobileViewport ? { display: "none" } : undefined} asChild>
                 <Link to="/auth">Connexion</Link>
               </Button>
-              <Button className="landing-nav-cta" asChild>
+              <Button className="landing-nav-cta" style={isMobileViewport ? { width: 104, maxWidth: 104, minWidth: 0, minHeight: 38, padding: "5px 7px", whiteSpace: "normal", textAlign: "center", lineHeight: 1.15, fontSize: 10 } : undefined} asChild>
                 <Link to="/auth" search={{ mode: "signup" }}>
                   Essayer gratuitement <ArrowUpRight aria-hidden="true" />
                 </Link>
