@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ClipboardList, Search } from "lucide-react";
+import { ClipboardList, Search, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";\nimport { Button } from "@/components/ui/button";
 import { Badge, DataTable, EmptyState, ErrorState, LoadingRows, PageHeader, Panel, StatCard, Td, Th } from "@/components/app/kit";
 import { customersQuery } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,11 +25,11 @@ function OrdersPage(){
  const label=(status:string)=>({en_attente:"En attente",confirmee:"Confirmée",preparee:"Préparée",livree:"Livrée",annulee:"Annulée"} as Record<string,string>)[status]??status;
  const tone=(status:string)=>status==="annulee"?"danger":status==="livree"?"success":status==="preparee"?"brand":"warning";
  return <>
- <PageHeader title="Commandes" description="Suivez les commandes clients, les acomptes et les dates prévues."/>
+ <PageHeader title="Commandes" description="Suivez les commandes clients, les acomptes et les dates prévues." actions={<Button asChild><Link to="/app/commandes/nouveau"><Plus/> Nouvelle commande</Link></Button>}/>
  <div className="mb-5 grid gap-3 sm:grid-cols-3"><StatCard label="À traiter" value={open.length} icon={ClipboardList} hint="Commandes non livrées ou annulées"/><StatCard label="En retard" value={overdue.length} icon={ClipboardList} tone={overdue.length?"brand":"default"} hint="Date prévue dépassée"/><StatCard label="Acomptes reçus" value={money(deposits)} icon={ClipboardList} hint="Total sur les commandes listées"/></div>
  <Panel><div className="mb-4 relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input className="pl-9" placeholder="Rechercher par numéro ou client" value={term} onChange={e=>setTerm(e.target.value)}/></div>
  {q.error?<ErrorState error={q.error} onRetry={()=>q.refetch()}/>:q.isLoading||cq.isLoading?<LoadingRows/>:rows.length===0?<EmptyState icon={ClipboardList} title="Aucune commande" description="Les commandes de vos clients seront regroupées ici."/>:filtered.length===0?<p className="py-8 text-center text-sm text-muted-foreground">Aucun résultat trouvé.</p>:
  <DataTable head={<><Th>Commande</Th><Th>Client</Th><Th>Créée le</Th><Th>Échéance</Th><Th>État</Th><Th className="text-right">Total</Th><Th className="text-right">Acompte</Th></>}>
- {filtered.map(o=><tr key={o.id}><Td><span className="font-medium">{o.number}</span></Td><Td>{customer(o.customer_id)}</Td><Td className="text-muted-foreground">{dateTime(o.created_at)}</Td><Td>{o.expected_date?dateOnly(o.expected_date):"—"}</Td><Td><Badge tone={tone(o.status)}>{label(o.status)}</Badge></Td><Td className="tnum text-right">{money(o.total)}</Td><Td className="tnum text-right">{money(o.deposit_total)}</Td></tr>)}
+ {filtered.map(o=><tr key={o.id}><Td><Link to="/app/commandes/$id" params={{id:o.id}} className="font-medium hover:underline">{o.number}</Link></Td><Td>{customer(o.customer_id)}</Td><Td className="text-muted-foreground">{dateTime(o.created_at)}</Td><Td>{o.expected_date?dateOnly(o.expected_date):"—"}</Td><Td><Badge tone={tone(o.status)}>{label(o.status)}</Badge></Td><Td className="tnum text-right">{money(o.total)}</Td><Td className="tnum text-right">{money(o.deposit_total)}</Td></tr>)}
  </DataTable>}</Panel></>;
 }
