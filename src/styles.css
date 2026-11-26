@@ -976,10 +976,10 @@ html,body,#root{width:100%;max-width:100%;overflow-x:hidden!important}
   html, body, #root { width:100%; max-width:100%; overflow-x:hidden !important; }
   body { -webkit-text-size-adjust:100%; }
   #root > div { min-width:0; max-width:100%; }
-  .lg\\:block { display:none !important; }
-  .lg\\:hidden { display:flex !important; }
-  .lg\\:pl-64 { padding-left:0 !important; }
-  .lg\\:pb-12 { padding-bottom:7rem !important; }
+  .lg\:block { display:none !important; }
+  .lg\:hidden { display:flex !important; }
+  .lg\:pl-64 { padding-left:0 !important; }
+  .lg\:pb-12 { padding-bottom:7rem !important; }
   main { width:100% !important; max-width:100% !important; min-width:0 !important; padding-left:14px !important; padding-right:14px !important; overflow-x:clip; }
   main > * { min-width:0; max-width:100%; }
   main h1, main h2, main h3, main p, main label, main a, main button, main span, main strong, main td, main th {
