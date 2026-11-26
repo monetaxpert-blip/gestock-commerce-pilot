@@ -1230,3 +1230,43 @@ html,body,#root{width:100%;max-width:100%;overflow-x:hidden!important}
   }
   .landing-security-note svg { flex:0 0 12px; }
 }
+
+
+/* Mobile continuous carousels for the three benefit cards and six feature cards */
+.landing-benefit-viewport,.landing-feature-viewport{width:100%;min-width:0;overflow:hidden}
+.landing-benefit-track,.landing-feature-track{display:flex;width:max-content;flex-flow:row nowrap;align-items:stretch;gap:16px;will-change:transform}
+.landing-benefit-grid,.landing-feature-grid{display:flex;flex-flow:row nowrap;align-items:stretch;gap:14px;width:max-content;min-width:0}
+@media (max-width:700px),(hover:none) and (pointer:coarse){
+  .landing-benefit-viewport,.landing-feature-viewport{overflow:hidden!important}
+  .landing-benefit-track{gap:12px;animation:gestock-cards 32s linear infinite}
+  .landing-feature-track{gap:12px;animation:gestock-cards 62s linear infinite}
+  .landing-benefit-grid,.landing-feature-grid{display:flex!important;flex-flow:row nowrap!important;gap:12px!important;width:max-content!important;overflow:visible!important;padding:4px 0 12px!important}
+  .landing-benefit-card,.landing-feature-card{flex:0 0 min(78vw,290px)!important;width:min(78vw,290px)!important;max-width:min(78vw,290px)!important;min-width:0!important;scroll-snap-align:none}
+  .landing-benefit-grid[aria-hidden="true"],.landing-feature-grid[aria-hidden="true"]{pointer-events:none}
+  .landing-benefit-track:hover,.landing-feature-track:hover{animation-play-state:paused}
+  .landing-security-section{
+    display:grid!important;
+    grid-template-columns:34px minmax(0,1fr) auto!important;
+    grid-template-rows:auto!important;
+    align-items:center!important;
+    gap:0 10px!important;
+    width:calc(100% - 28px)!important;
+    min-width:0!important;
+  }
+  .landing-security-icon{grid-column:1!important;grid-row:1!important}
+  .landing-security-section>div:nth-child(2){grid-column:2!important;grid-row:1!important;min-width:0!important}
+  .landing-security-section .landing-kicker{white-space:normal!important;font-size:8px!important;letter-spacing:.04em!important}
+  .landing-security-section h2{font-size:clamp(13px,3.6vw,17px)!important;line-height:1.2!important;overflow-wrap:anywhere!important}
+  .landing-security-section>div:nth-child(2)>p:last-child{font-size:9px!important;line-height:1.35!important;overflow-wrap:anywhere!important}
+  .landing-security-note{grid-column:3!important;grid-row:1!important;justify-self:end!important;max-width:86px!important;white-space:normal!important;font-size:8px!important;line-height:1.25!important}
+  .landing-security-note svg{width:12px!important;height:12px!important;flex:0 0 12px!important}
+  .landing-footer-inner{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:16px!important;min-width:0!important}
+  .landing-footer-inner>div:first-child{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:8px!important;min-width:0!important}
+  .landing-footer-inner>div:first-child>a,.landing-footer-inner>div:first-child .landing-brand{display:block!important;max-width:100%!important}
+  .landing-footer-inner>div:first-child>p{white-space:normal!important;max-width:100%!important;font-size:12px!important;line-height:1.5!important;overflow-wrap:break-word!important}
+  .landing-footer-links{display:flex!important;flex-flow:row wrap!important;align-items:center!important;justify-content:flex-start!important;gap:10px 18px!important;min-width:0!important;width:100%!important}
+  .landing-footer-links a{display:inline-block!important;flex:0 0 auto!important;white-space:nowrap!important;font-size:12px!important;line-height:1.5!important}
+  .landing-copyright{width:100%!important;white-space:normal!important;overflow-wrap:break-word!important;font-size:10px!important;line-height:1.4!important}
+}
+@keyframes gestock-cards{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 6px))}}
+@media(prefers-reduced-motion:reduce){.landing-benefit-track,.landing-feature-track{animation:none!important}}
