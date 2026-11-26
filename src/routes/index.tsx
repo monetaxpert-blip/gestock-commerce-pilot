@@ -1,4 +1,4 @@
-import { useEffect, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -9,6 +9,8 @@ import {
   ChevronDown,
   ClipboardList,
   HandCoins,
+  Menu,
+  X,
   Package,
   ShieldCheck,
   ShoppingBag,
@@ -95,6 +97,8 @@ const FEATURES = [
 const SAMPLE_BARS = [32, 48, 39, 61, 52, 73, 57, 82, 68, 92, 76, 100];
 
 function Landing() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -132,11 +136,20 @@ function Landing() {
             <Link to="/" aria-label="GESTOCK, accueil" className="landing-brand">
               <Logo />
             </Link>
-            <nav className="landing-nav-links" aria-label="Navigation principale">
-              <a href="#fonctionnalites">Fonctionnalités</a>
-              <a href="#comment-ca-marche">Comment ça marche</a>
-              <a href="#faq">Questions fréquentes</a>
+            <nav className={`landing-nav-links${mobileMenuOpen ? " is-open" : ""}`} aria-label="Navigation principale">
+              <a href="#fonctionnalites" onClick={() => setMobileMenuOpen(false)}>Fonctionnalités</a>
+              <a href="#comment-ca-marche" onClick={() => setMobileMenuOpen(false)}>Comment ça marche</a>
+              <a href="#faq" onClick={() => setMobileMenuOpen(false)}>Questions fréquentes</a>
             </nav>
+            <button
+              type="button"
+              className="landing-mobile-menu-toggle"
+              aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen((open) => !open)}
+            >
+              {mobileMenuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+            </button>
             <div className="landing-header-actions">
               <Button variant="ghost" className="landing-login" asChild>
                 <Link to="/auth">Connexion</Link>
