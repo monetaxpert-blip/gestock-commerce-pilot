@@ -155,23 +155,23 @@ function Landing() {
             <div className="landing-hero-copy" data-reveal>
               <div className="landing-eyebrow">
                 <span className="landing-eyebrow-dot" />
-                POUR LES COMMERÇANTS QUI VEULENT GARDER LE CONTRÔLE
+                PILOTEZ VOTRE BOUTIQUE AVEC DES CHIFFRES CLAIRS
               </div>
               <h1>
-                Vous savez ce que vous vendez.
-                <span> Mais savez-vous ce qu'il vous reste ?</span>
+                Votre boutique tourne.
+                <span> Vos chiffres doivent suivre.</span>
               </h1>
               <p className="landing-hero-description">
-                Un produit oublié, une rupture imprévue, une vente mal notée : au quotidien, ces petits écarts coûtent du temps et de l'argent. GESTOCK rassemble votre stock, vos ventes, vos commandes et vos clients pour vous aider à savoir où vous en êtes.
+                Stock, ventes, commandes et clients : arrêtez de chercher vos informations dans plusieurs endroits. GESTOCK réunit l'essentiel de votre activité pour vous permettre de décider avec une vue claire, au quotidien.
               </p>
               <div className="landing-hero-actions">
                 <Button size="lg" className="landing-primary-cta" asChild>
                   <Link to="/auth" search={{ mode: "signup" }}>
-                    Je crée mon espace gratuitement <ArrowRight aria-hidden="true" />
+                    Démarrer mon essai gratuit <ArrowRight aria-hidden="true" />
                   </Link>
                 </Button>
                 <a className="landing-text-link" href="#fonctionnalites">
-                  Voir comment ça fonctionne <span aria-hidden="true">↓</span>
+                  Découvrir GESTOCK <span aria-hidden="true">↓</span>
                 </a>
               </div>
               <div className="landing-trust-points">
@@ -197,7 +197,7 @@ function Landing() {
           </section>
 
           <div className="landing-value-strip" data-reveal>
-            <p>Votre boutique mérite mieux que des notes éparpillées.</p>
+            <p>Une gestion claire, du stock jusqu'à la vente.</p>
             <div>
               <span><Package aria-hidden="true" /> Produits</span>
               <span><Boxes aria-hidden="true" /> Stock</span>
@@ -213,31 +213,31 @@ function Landing() {
         <div className="landing-section-intro">
           <p className="landing-kicker">LES QUESTIONS QUI COMPTENT AU QUOTIDIEN</p>
           <h2>
-            Ne gérez plus votre boutique de mémoire.
-            <span> Appuyez-vous sur des informations à jour.</span>
+            Moins de suppositions.
+            <span>Plus de visibilité sur votre activité.</span>
           </h2>
           <p>
-            Combien d'articles vous restent-ils ? Quelles ventes ont été encaissées ? Quelle marge brute vos produits dégagent-ils ? Retrouvez ces réponses sans devoir recouper plusieurs cahiers ou fichiers.
+            En un coup d'œil, retrouvez les quantités disponibles, les ventes enregistrées et la marge brute estimée. Les informations sont regroupées dans votre espace, sans jongler entre cahiers et fichiers.
           </p>
         </div>
         <div className="landing-benefit-grid">
           <article className="landing-benefit-card">
             <div className="landing-benefit-index">01 / STOCK</div>
             <div className="landing-benefit-icon"><Boxes aria-hidden="true" /></div>
-            <h3>Évitez les surprises de stock.</h3>
-            <p>Voyez les quantités disponibles, les entrées et les sorties pour repérer plus tôt les produits à renouveler.</p>
+            <h3>Anticipez les ruptures.</h3>
+            <p>Suivez les quantités disponibles et repérez les articles qui approchent de leur seuil de réapprovisionnement.</p>
           </article>
           <article className="landing-benefit-card landing-benefit-card-featured">
             <div className="landing-benefit-index">02 / VENTES</div>
             <div className="landing-benefit-icon"><ShoppingBag aria-hidden="true" /></div>
-            <h3>Retrouvez chaque vente.</h3>
-            <p>Centralisez vos ventes et leurs règlements. Vous savez ce qui est payé et ce qu'il reste à encaisser.</p>
+            <h3>Gardez une trace de chaque vente.</h3>
+            <p>Enregistrez vos ventes et règlements pour savoir ce qui a été encaissé et ce qui reste à recevoir.</p>
           </article>
           <article className="landing-benefit-card">
             <div className="landing-benefit-index">03 / MARGE</div>
             <div className="landing-benefit-icon"><TrendingUp aria-hidden="true" /></div>
-            <h3>Ne confondez plus ventes et marge.</h3>
-            <p>Comparez le prix de vente au coût d'achat pour suivre la marge brute réellement dégagée par vos articles.</p>
+            <h3>Voyez ce que vos ventes rapportent.</h3>
+            <p>Le chiffre d'affaires ne dit pas tout. Comparez les ventes au coût des produits pour suivre votre marge brute estimée.</p>
           </article>
         </div>
       </section>
@@ -246,10 +246,10 @@ function Landing() {
         <div className="landing-section-heading" data-reveal>
           <div>
             <p className="landing-kicker">LES FONCTIONNALITÉS</p>
-            <h2>Tout votre quotidien commercial. <span>Un seul espace.</span></h2>
+            <h2>Les outils essentiels de votre commerce. <span>Réunis au même endroit.</span></h2>
           </div>
           <p>
-            Du premier article enregistré au suivi de vos clients, retrouvez les outils essentiels sans multiplier les supports.
+            Produits, quantités, ventes, commandes et clients : vos informations sont organisées dans un espace unique.
           </p>
         </div>
         <div className="landing-feature-grid">
@@ -270,9 +270,9 @@ function Landing() {
       <section id="comment-ca-marche" className="landing-section landing-workflow-section">
         <div className="landing-workflow-copy" data-reveal>
           <p className="landing-kicker">UNE PRISE EN MAIN SANS DÉTOUR</p>
-          <h2>Commencez simplement. <span>Gardez une vue d'ensemble.</span></h2>
+          <h2>Mettez votre boutique en place. <span>Suivez-la au quotidien.</span></h2>
           <p>
-            Configurez votre boutique, ajoutez vos produits et enregistrez vos ventes. Vos informations se retrouvent dans le même espace, au rythme de votre activité.
+            Créez votre espace, renseignez vos articles et commencez à enregistrer vos opérations. GESTOCK rassemble ensuite vos repères de gestion au fil de votre activité.
           </p>
           <Button size="lg" className="landing-primary-cta" asChild>
             <Link to="/auth" search={{ mode: "signup" }}>
@@ -334,8 +334,8 @@ function Landing() {
       <section className="landing-final-cta" data-reveal>
         <div className="landing-final-cta-orb" aria-hidden="true" />
         <p className="landing-kicker">LE PROCHAIN PAS EST SIMPLE</p>
-        <h2>Et si votre boutique devenait plus simple à suivre ?</h2>
-        <p>Créez votre espace et découvrez pendant 14 jours une autre façon de suivre vos stocks, vos ventes et votre marge brute.</p>
+        <h2>Faites le point sur votre boutique, chaque jour.</h2>
+        <p>Essayez GESTOCK pendant 14 jours et retrouvez vos stocks, ventes et marges brutes estimées dans un espace organisé.</p>
         <Button size="lg" className="landing-primary-cta landing-final-button" asChild>
           <Link to="/auth" search={{ mode: "signup" }}>
             Je commence gratuitement <ArrowRight aria-hidden="true" />
