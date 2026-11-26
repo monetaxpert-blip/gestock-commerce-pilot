@@ -262,25 +262,31 @@ function Landing() {
             En un coup d'œil, retrouvez les quantités disponibles, les ventes enregistrées et la marge brute estimée. Les informations sont regroupées dans votre espace, sans jongler entre cahiers et fichiers.
           </p>
         </div>
-        <div className="landing-benefit-grid">
-          <article className="landing-benefit-card">
-            <div className="landing-benefit-index">01 / STOCK</div>
-            <div className="landing-benefit-icon"><Boxes aria-hidden="true" /></div>
-            <h3>Anticipez les ruptures.</h3>
-            <p>Suivez les quantités disponibles et repérez les articles qui approchent de leur seuil de réapprovisionnement.</p>
-          </article>
-          <article className="landing-benefit-card landing-benefit-card-featured">
-            <div className="landing-benefit-index">02 / VENTES</div>
-            <div className="landing-benefit-icon"><ShoppingBag aria-hidden="true" /></div>
-            <h3>Gardez une trace de chaque vente.</h3>
-            <p>Enregistrez vos ventes et règlements pour savoir ce qui a été encaissé et ce qui reste à recevoir.</p>
-          </article>
-          <article className="landing-benefit-card">
-            <div className="landing-benefit-index">03 / MARGE</div>
-            <div className="landing-benefit-icon"><TrendingUp aria-hidden="true" /></div>
-            <h3>Voyez ce que vos ventes rapportent.</h3>
-            <p>Le chiffre d'affaires ne dit pas tout. Comparez les ventes au coût des produits pour suivre votre marge brute estimée.</p>
-          </article>
+        <div className="landing-benefit-viewport">
+          <div className="landing-benefit-track">
+            {[0, 1].map((copy) => (
+              <div className="landing-benefit-grid" key={copy} aria-hidden={copy === 1}>
+                <article className="landing-benefit-card">
+                  <div className="landing-benefit-index">01 / STOCK</div>
+                  <div className="landing-benefit-icon"><Boxes aria-hidden="true" /></div>
+                  <h3>Anticipez les ruptures.</h3>
+                  <p>Suivez les quantités disponibles et repérez les articles qui approchent de leur seuil de réapprovisionnement.</p>
+                </article>
+                <article className="landing-benefit-card landing-benefit-card-featured">
+                  <div className="landing-benefit-index">02 / VENTES</div>
+                  <div className="landing-benefit-icon"><ShoppingBag aria-hidden="true" /></div>
+                  <h3>Gardez une trace de chaque vente.</h3>
+                  <p>Enregistrez vos ventes et règlements pour savoir ce qui a été encaissé et ce qui reste à recevoir.</p>
+                </article>
+                <article className="landing-benefit-card">
+                  <div className="landing-benefit-index">03 / MARGE</div>
+                  <div className="landing-benefit-icon"><TrendingUp aria-hidden="true" /></div>
+                  <h3>Voyez ce que vos ventes rapportent.</h3>
+                  <p>Le chiffre d'affaires ne dit pas tout. Comparez les ventes au coût des produits pour suivre votre marge brute estimée.</p>
+                </article>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -294,8 +300,11 @@ function Landing() {
             Produits, quantités, ventes, commandes et clients : vos informations sont organisées dans un espace unique.
           </p>
         </div>
-        <div className="landing-feature-grid">
-          {FEATURES.map(({ icon: Icon, number, title, description, detail }) => (
+        <div className="landing-feature-viewport">
+          <div className="landing-feature-track">
+            {[0, 1].map((copy) => (
+              <div className="landing-feature-grid" key={copy} aria-hidden={copy === 1}>
+                {FEATURES.map(({ icon: Icon, number, title, description, detail }) => (
             <article className="landing-feature-card" key={number} data-reveal>
               <div className="landing-feature-topline">
                 <span className="landing-feature-icon"><Icon aria-hidden="true" /></span>
@@ -305,7 +314,10 @@ function Landing() {
               <p>{description}</p>
               <div className="landing-feature-detail">{detail}</div>
             </article>
-          ))}
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
