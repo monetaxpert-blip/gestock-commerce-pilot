@@ -103,12 +103,21 @@ function Landing() {
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1100px)");
     const update = () => {
-      setIsMobileViewport(media.matches);
-      if (!media.matches) setMobileMenuOpen(false);
+      // iOS Safari can report a desktop-sized layout viewport even on an iPhone.
+      const touchDevice = navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches;
+      const mobile = media.matches || window.innerWidth <= 1100 || window.screen.width <= 1100 || touchDevice;
+      setIsMobileViewport(mobile);
+      if (!mobile) setMobileMenuOpen(false);
     };
     update();
     media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    return () => {
+      media.removeEventListener("change", update);
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+    };
   }, []);
 
   useEffect(() => {
