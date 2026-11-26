@@ -5,18 +5,19 @@ const auth = createLovableAuth({
   oauthBrokerUrl: "https://oauth.lovable.app/initiate",
 });
 
-export async function signInWithGoogle(redirectUri: string) {
-  const result = await auth.signInWithOAuth("google", {
-    redirect_uri: redirectUri,
-    extraParams: {
-      project_id: "823a6997-aab0-4107-82b7-459091e3a79f",
-      project_env: "prod",
-    },
+const oauthParams = {
+  project_id: "823a6997-aab0-4107-82b7-459091e3a79f",
+  project_env: "prod",
+};
+
+async function signInWithBroker(provider: "google" | "apple") {
+  const result = await auth.signInWithOAuth(provider, {
+    // Let Lovable choose its registered callback. A custom /auth redirect URI
+    // was rejected by the OAuth provider as an unapproved redirect_uri.
+    extraParams: oauthParams,
   });
 
-  if (result.redirected || result.error) {
-    return result;
-  }
+  if (result.redirected || result.error) return result;
 
   try {
     await supabase.auth.setSession(result.tokens);
@@ -25,4 +26,12 @@ export async function signInWithGoogle(redirectUri: string) {
   }
 
   return result;
+}
+
+export function signInWithGoogle() {
+  return signInWithBroker("google");
+}
+
+export function signInWithApple() {
+  return signInWithBroker("apple");
 }
