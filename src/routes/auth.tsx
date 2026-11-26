@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
+import { ArrowLeft, Loader2, MailCheck, Smartphone, Apple } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 const signInSchema = z.object({
-  email: z.string().trim().email("Adresse e-mail invalide").max(255),
+  identifier: z.string().trim().min(1, "Saisissez votre e-mail ou numéro de téléphone").max(255),
   password: z.string().min(1, "Saisissez votre mot de passe"),
 });
 const signUpSchema = z.object({
@@ -57,9 +57,10 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>(search.mode ?? "signin");
   const [busy, setBusy] = useState(false);
-  const [errors, setErrors] = useState<FormErrors<"fullName" | "phone" | "email" | "password">>({});
+  const [errors, setErrors] = useState<FormErrors<"fullName" | "phone" | "email" | "identifier" | "password">>({});
   const [sentTo, setSentTo] = useState<string | null>(null);
-  const [form, setForm] = useState({ fullName: "", phone: "", email: "", password: "" });
+  const [form, setForm] = useState({ fullName: "", phone: "", email: "", identifier: "", password: "" });
+  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -93,11 +94,17 @@ function AuthPage() {
       return;
     }
     const schema = mode === "signin" ? signInSchema : signUpSchema;
-    const parsed = schema.safeParse(form);
+    const parsed = schema.safeParse(mode === "signin" ? { identifier: form.identifier, password: form.password } : form);
     if (!parsed.success) return setErrors(zodErrors(parsed.error));
     setBusy(true);
     if (mode === "signin") {
-      const { error } = await supabase.auth.signInWithPassword({ email: form.email.trim(), password: form.password });
+      const identifier = form.identifier.trim();
+      const isPhone = loginMethod === "phone";
+      const phone = identifier.replace(/[\s().-]/g, "");
+      const normalizedPhone = /^0[0-9]{9}$/.test(phone) ? `+221${phone.slice(1)}` : /^7[0-9]{8}$/.test(phone) ? `+221${phone}` : phone;
+      const { error } = await supabase.auth.signInWithPassword(
+        isPhone ? { phone: normalizedPhone, password: form.password } : { email: identifier, password: form.password },
+      );
       setBusy(false);
       if (error) return toast.error(translateAuthError(error.message));
       navigate({ to: "/app", replace: true });
@@ -157,8 +164,8 @@ function AuthPage() {
         </ul>
       </aside>
 
-      <main className="flex items-center justify-center px-5 py-10 sm:px-8">
-        <div className="w-full max-w-[400px] fade-up">
+      <main className="flex min-w-0 items-center justify-center px-4 py-7 sm:px-8 sm:py-10">
+        <div className="w-full min-w-0 max-w-[440px] fade-up">
           <div className="mb-8 flex items-center justify-between lg:hidden">
             <Link to="/">
               <Logo />
@@ -191,15 +198,26 @@ function AuthPage() {
             </div>
           ) : (
             <>
-              <h1 className="text-3xl font-semibold">{titles[mode].h}</h1>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand-soft px-3 py-1.5 text-xs font-medium text-brand-foreground"><span className="size-1.5 rounded-full bg-brand" /> Votre commerce, mieux organisé</div>
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{titles[mode].h}</h1>
               <p className="mt-2 text-sm text-muted-foreground">{titles[mode].p}</p>
 
               {mode !== "forgot" && (
                 <div className="mt-7 space-y-5">
-                  <GoogleButton />
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <GoogleButton />
+                    <button type="button" onClick={async () => {
+                      if (busy) return;
+                      setBusy(true);
+                      const { error } = await supabase.auth.signInWithOAuth({ provider: "apple", options: { redirectTo: `${window.location.origin}/auth` } });
+                      if (error) { setBusy(false); toast.error("La connexion Apple n'est pas encore configurée. Réessayez plus tard."); }
+                    }} disabled={busy} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-foreground px-3 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-60">
+                      <Apple className="size-[18px]" /> Continuer avec Apple
+                    </button>
+                  </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="h-px flex-1 bg-border" />
-                    ou avec votre e-mail
+                    ou avec vos identifiants
                     <span className="h-px flex-1 bg-border" />
                   </div>
                 </div>
@@ -216,9 +234,22 @@ function AuthPage() {
                     </Field>
                   </div>
                 )}
-                <Field label="Adresse e-mail" error={errors.email}>
-                  <Input type="email" value={form.email} onChange={set("email")} autoComplete="email" placeholder="vous@exemple.com" />
-                </Field>
+                {mode === "signin" ? (
+                  <>
+                    <div className="grid grid-cols-2 rounded-xl bg-muted p-1">
+                      <button type="button" onClick={() => { setLoginMethod("email"); setForm((f) => ({ ...f, identifier: "" })); }} className={`min-h-10 rounded-lg text-sm font-medium transition ${loginMethod === "email" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>E-mail</button>
+                      <button type="button" onClick={() => { setLoginMethod("phone"); setForm((f) => ({ ...f, identifier: "" })); }} className={`min-h-10 rounded-lg text-sm font-medium transition ${loginMethod === "phone" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}><Smartphone className="mr-1 inline size-4" />Téléphone</button>
+                    </div>
+                    <Field label={loginMethod === "email" ? "Adresse e-mail" : "Numéro de téléphone"} error={errors.identifier}>
+                      <Input type={loginMethod === "email" ? "email" : "tel"} inputMode={loginMethod === "email" ? "email" : "tel"} value={form.identifier} onChange={set("identifier")} autoComplete={loginMethod === "email" ? "username" : "tel"} placeholder={loginMethod === "email" ? "vous@exemple.com" : "+221 77 123 45 67"} />
+                    </Field>
+                    {loginMethod === "phone" && <p className="text-xs leading-relaxed text-muted-foreground">Connexion sans SMS pour les numéros déjà associés et confirmés à un compte GESTOCK.</p>}
+                  </>
+                ) : (
+                  <Field label="Adresse e-mail" error={errors.email}>
+                    <Input type="email" value={form.email} onChange={set("email")} autoComplete="email" placeholder="vous@exemple.com" />
+                  </Field>
+                )}
                 {mode !== "forgot" && (
                   <Field
                     label="Mot de passe"
