@@ -233,12 +233,19 @@ function Landing() {
 
           <div className="landing-value-strip" data-reveal>
             <p>Une gestion claire, du stock jusqu'à la vente.</p>
-            <div>
+            <div className="landing-marquee-viewport">
+              <div className="landing-marquee-track">
               <span><Package aria-hidden="true" /> Produits</span>
               <span><Boxes aria-hidden="true" /> Stock</span>
               <span><ShoppingBag aria-hidden="true" /> Ventes</span>
               <span><TrendingUp aria-hidden="true" /> Marges</span>
               <span><Users aria-hidden="true" /> Clients</span>
+              <span><Package aria-hidden="true" /> Produits</span>
+              <span><Boxes aria-hidden="true" /> Stock</span>
+              <span><ShoppingBag aria-hidden="true" /> Ventes</span>
+              <span><TrendingUp aria-hidden="true" /> Marges</span>
+              <span><Users aria-hidden="true" /> Clients</span>
+              </div>
             </div>
           </div>
         </main>
