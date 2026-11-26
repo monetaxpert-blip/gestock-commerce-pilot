@@ -19,11 +19,11 @@ function OrdersPage(){
  const rows=q.data??[],customers=cq.data??[];
  const customer=(id:string)=>customers.find(c=>c.id===id)?.name??"Client";
  const filtered=useMemo(()=>rows.filter(o=>(o.number+" "+customer(o.customer_id)).toLowerCase().includes(term.trim().toLowerCase())),[rows,term,customers]);
- const open=rows.filter(o=>!["delivered","cancelled"].includes(o.status));
+ const open=rows.filter(o=>!["livree","annulee"].includes(o.status));
  const overdue=open.filter(o=>o.expected_date&&o.expected_date<new Date().toISOString().slice(0,10));
  const deposits=rows.reduce((sum,o)=>sum+Number(o.deposit_total),0);
- const label=(status:string)=>({draft:"Brouillon",confirmed:"Confirmée",prepared:"Prête",delivered:"Livrée",cancelled:"Annulée"} as Record<string,string>)[status]??status;
- const tone=(status:string)=>status==="cancelled"?"danger":status==="delivered"?"success":status==="prepared"?"brand":"warning";
+ const label=(status:string)=>({en_attente:"En attente",confirmee:"Confirmée",preparee:"Préparée",livree:"Livrée",annulee:"Annulée"} as Record<string,string>)[status]??status;
+ const tone=(status:string)=>status==="annulee"?"danger":status==="livree"?"success":status==="preparee"?"brand":"warning";
  return <>
  <PageHeader title="Commandes" description="Suivez les commandes clients, les acomptes et les dates prévues."/>
  <div className="mb-5 grid gap-3 sm:grid-cols-3"><StatCard label="À traiter" value={open.length} icon={ClipboardList} hint="Commandes non livrées ou annulées"/><StatCard label="En retard" value={overdue.length} icon={ClipboardList} tone={overdue.length?"brand":"default"} hint="Date prévue dépassée"/><StatCard label="Acomptes reçus" value={money(deposits)} icon={ClipboardList} hint="Total sur les commandes listées"/></div>
