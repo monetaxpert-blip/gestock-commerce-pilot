@@ -59,6 +59,9 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<FormErrors<"fullName" | "phone" | "email" | "identifier" | "password">>({});
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const [pendingPhone, setPendingPhone] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [otp, setOtp] = useState("");
   const [form, setForm] = useState({ fullName: "", phone: "", email: "", identifier: "", password: "" });
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
 
@@ -81,6 +84,25 @@ function AuthPage() {
     e.preventDefault();
     if (busy) return;
     setErrors({});
+    if (pendingPhone) {
+      if (!/^\\d{6}$/.test(otp.trim())) return toast.error("Saisissez le code SMS à 6 chiffres.");
+      setBusy(true);
+      const { error } = await supabase.auth.verifyOtp({ phone: pendingPhone, token: otp.trim(), type: "sms" });
+      if (error) {
+        setBusy(false);
+        return toast.error(translateAuthError(error.message));
+      }
+      if (pendingEmail) {
+        const { error: emailError } = await supabase.auth.updateUser({ email: pendingEmail });
+        if (emailError) toast.info("Votre téléphone est confirmé. Vous pourrez ajouter ou confirmer votre e-mail depuis votre espace.");
+        else toast.success("Téléphone confirmé. Un lien de confirmation a été envoyé à votre adresse e-mail.");
+      }
+      setBusy(false);
+      setPendingPhone(null);
+      setPendingEmail(null);
+      navigate({ to: "/app", replace: true });
+      return;
+    }
     if (mode === "forgot") {
       const parsed = z.string().trim().email("Adresse e-mail invalide").safeParse(form.email);
       if (!parsed.success) return setErrors({ email: parsed.error.issues[0]?.message ?? "Adresse e-mail invalide" });
@@ -110,18 +132,29 @@ function AuthPage() {
       navigate({ to: "/app", replace: true });
     } else {
       const d = parsed.data as z.infer<typeof signUpSchema>;
+      const rawPhone = d.phone.replace(/[\\s().-]/g, "");
+      const normalizedPhone = /^0[0-9]{9}$/.test(rawPhone)
+        ? `+221${rawPhone.slice(1)}`
+        : /^7[0-9]{8}$/.test(rawPhone)
+          ? `+221${rawPhone}`
+          : rawPhone.startsWith("221")
+            ? `+${rawPhone}`
+            : rawPhone;
       const { data, error } = await supabase.auth.signUp({
-        email: d.email,
+        phone: normalizedPhone,
         password: d.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth`,
-          data: { full_name: d.fullName, phone: d.phone.replace(/\s/g, "") },
-        },
+        options: { data: { full_name: d.fullName, email: d.email } },
       });
       setBusy(false);
       if (error) return toast.error(translateAuthError(error.message));
-      if (data.session) navigate({ to: "/app", replace: true });
-      else setSentTo(d.email);
+      if (data.session) {
+        await supabase.auth.signOut();
+        return toast.error("La confirmation SMS doit être activée avant d'autoriser les inscriptions par téléphone. Réessayez après configuration.");
+      }
+      setPendingPhone(normalizedPhone);
+      setPendingEmail(d.email);
+      setOtp("");
+      toast.success("Code de vérification envoyé par SMS.");
     }
   }
 
@@ -172,7 +205,39 @@ function AuthPage() {
             </Link>
           </div>
 
-          {sentTo ? (
+          {pendingPhone ? (
+            <div className="rounded-2xl border border-border bg-card p-7 shadow-soft">
+              <div className="mb-4 inline-flex size-11 items-center justify-center rounded-full bg-brand-soft text-brand-foreground">
+                <Smartphone className="size-5" />
+              </div>
+              <h1 className="text-2xl font-semibold">Confirmez votre téléphone</h1>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Saisissez le code à 6 chiffres envoyé par SMS au <span className="font-medium text-foreground">{pendingPhone}</span>.
+                Cette vérification est demandée une seule fois à l'inscription.
+              </p>
+              <form onSubmit={onSubmit} className="mt-6 space-y-4">
+                <Field label="Code de vérification">
+                  <Input value={otp} onChange={(e) => setOtp(e.target.value.replace(/\\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000" />
+                </Field>
+                <Button type="submit" className="h-11 w-full" disabled={busy || otp.length !== 6}>
+                  {busy && <Loader2 className="animate-spin" />}
+                  Vérifier et créer mon compte
+                </Button>
+              </form>
+              <button type="button" disabled={busy} onClick={async () => {
+                setBusy(true);
+                const { error } = await supabase.auth.resend({ type: "sms", phone: pendingPhone });
+                setBusy(false);
+                if (error) toast.error(translateAuthError(error.message));
+                else toast.success("Un nouveau code vient d'être envoyé.");
+              }} className="mt-4 w-full text-center text-sm font-medium text-foreground underline-offset-4 hover:underline disabled:opacity-50">
+                Renvoyer le code
+              </button>
+              <button type="button" onClick={() => { setPendingPhone(null); setPendingEmail(null); setOtp(""); }} className="mt-3 w-full text-center text-sm text-muted-foreground hover:text-foreground">
+                Annuler l'inscription
+              </button>
+            </div>
+          ) : sentTo ? (
             <div className="rounded-2xl border border-border bg-card p-7 shadow-soft">
               <div className="mb-4 inline-flex size-11 items-center justify-center rounded-full bg-brand-soft text-brand-foreground">
                 <MailCheck className="size-5" />
