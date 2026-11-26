@@ -8,7 +8,7 @@ export function GoogleButton({ label = "Continuer avec Google" }: { label?: stri
   async function onClick() {
     setBusy(true);
     try {
-      const result = await signInWithGoogle(`${window.location.origin}/auth`);
+      const result = await signInWithGoogle();
       if (result.error) {
         toast.error("La connexion avec Google a échoué. Réessayez.");
         setBusy(false);
