@@ -3,11 +3,7 @@
 import { createLovableAuth } from "@lovable.dev/cloud-auth-js";
 import type { OAuthProvider } from "@lovable.dev/cloud-auth-js";
 import { supabase } from "../supabase/client";
-// On Vercel, /~oauth/initiate belongs to Lovable's edge routing and is not
-// available on this application's domain. Call the broker's public endpoint directly.
-const lovableAuth = createLovableAuth({
-  oauthBrokerUrl: "https://oauth.lovable.app/initiate",
-});
+const lovableAuth = createLovableAuth();
 
 type SignInOptions = {
   redirect_uri?: string;
@@ -20,8 +16,6 @@ export const lovable = {
       const result = await lovableAuth.signInWithOAuth(provider, {
         ...opts,
         extraParams: {
-          project_id: "823a6997-aab0-4107-82b7-459091e3a79f",
-          project_env: "prod",
           ...opts?.extraParams,
         },
       });
