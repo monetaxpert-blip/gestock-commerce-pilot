@@ -733,3 +733,22 @@
   }
   .motion-ready [data-reveal] { opacity: 1; transform: none; }
 }
+
+
+/* Mobile resilience: prevent viewport-wide horizontal overflow on phones. */
+@layer base {
+  html, body, #root { width: 100%; max-width: 100%; min-width: 0; overflow-x: clip; }
+  body { min-height: 100dvh; }
+  img, video, canvas, svg, input, select, textarea, button { max-width: 100%; }
+  * { min-width: 0; }
+}
+@media (max-width: 640px) {
+  .landing-header-inner { width: calc(100% - 32px); gap: 12px; }
+  .landing-nav-links { display: none; }
+  .landing-hero { width: calc(100% - 32px); min-height: auto; padding: 58px 0 64px; grid-template-columns: minmax(0, 1fr); gap: 42px; }
+  .landing-hero h1 { font-size: clamp(2.35rem, 11vw, 3.4rem); overflow-wrap: anywhere; }
+  .landing-dashboard-wrap { transform: none; }
+  .landing-dashboard-body { grid-template-columns: minmax(0, 1fr); }
+  .landing-dashboard-sidebar { display: none; }
+  .landing-dashboard-main { min-width: 0; }
+}
