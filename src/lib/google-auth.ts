@@ -20,11 +20,16 @@ async function signInWithBroker(provider: "google" | "apple") {
   if (result.redirected || result.error) return result;
 
   try {
-    await supabase.auth.setSession(result.tokens);
+    const { error } = await supabase.auth.setSession(result.tokens);
+    if (error) return { error };
   } catch (error) {
     return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 
+  // Use one post-auth entry point for both providers. The /app route checks
+  // the authenticated user's shop through RLS and sends first-time users
+  // without a shop to /onboarding; existing shop owners reach their workspace.
+  window.location.assign("/app");
   return result;
 }
 
