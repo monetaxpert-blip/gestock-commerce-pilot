@@ -24,6 +24,14 @@ function normalize(s: string) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
+function normalizeSenegalPhone(value: string): string {
+  const compact = value.replace(/[^\d+]/g, "");
+  const digits = compact.replace(/\D/g, "");
+  if (digits.length === 9 && /^[37]/.test(digits)) return `+221${digits}`;
+  if (digits.length === 12 && digits.startsWith("221")) return `+${digits}`;
+  return compact;
+}
+
 export function filterArticles(list: ArticleRow[], term: string) {
   const t = normalize(term.trim());
   if (!t) return list;
