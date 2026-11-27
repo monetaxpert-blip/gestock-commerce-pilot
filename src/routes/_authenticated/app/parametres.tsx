@@ -22,7 +22,7 @@ function SettingsPage(){
  const [negative,setNegative]=useState(shop.allow_negative_stock);
  const mutation=useMutation({mutationFn:async()=>{
   if(!name.trim())throw new Error("Le nom de la boutique est obligatoire.");
-  if(phone.trim()&&!/^\+?[0-9\s]{8,20}$/.test(phone.trim()))throw new Error("Le téléphone doit contenir uniquement des chiffres, des espaces et éventuellement le préfixe +.");
+  if(phone.trim()&&(!/^\+?[0-9\s]{8,20}$/.test(phone.trim())||!/[0-9]/.test(phone)))throw new Error("Le téléphone doit contenir uniquement des chiffres, des espaces et éventuellement le préfixe +.");
   const {error}=await supabase.from("shops").update({name:name.trim(),phone:phone.trim()||null,address:address.trim()||null,city:city.trim()||null,sector:sector.trim()||null,receipt_footer:footer.trim()||null,allow_negative_stock:negative}).eq("id",shop.id);
   if(error)throw error;
  },onSuccess:async()=>{await qc.invalidateQueries({queryKey:["shop"]});toast.success("Paramètres enregistrés.");},onError:(e)=>toast.error((e as Error).message||"Enregistrement impossible.")});
