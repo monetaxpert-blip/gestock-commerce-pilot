@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CustomerFormDialog } from "@/components/app/pickers";
 import { Badge, DataTable, EmptyState, ErrorState, LoadingRows, PageHeader, Panel, Td, Th } from "@/components/app/kit";
-import { customersQuery } from "@/lib/catalog";
+import { customersQuery, type Customer } from "@/lib/catalog";
 import { useShop } from "@/lib/shop";
-import type { Customer } from "@/lib/catalog";
 
 export const Route = createFileRoute("/_authenticated/app/clients/")({
   head: () => ({ meta: [{ title: "Clients | GESTOCK" }, { name: "description", content: "Retrouvez vos contacts clients et leurs informations." }] }),
