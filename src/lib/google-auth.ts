@@ -10,8 +10,8 @@ const oauthParams = {
   project_env: "prod",
 };
 
-async function signInWithBroker(provider: "google" | "apple") {
-  const result = await auth.signInWithOAuth(provider, {
+async function signInWithGoogleBroker() {
+  const result = await auth.signInWithOAuth("google", {
     // Let Lovable choose its registered callback. A custom /auth redirect URI
     // was rejected by the OAuth provider as an unapproved redirect_uri.
     extraParams: oauthParams,
@@ -26,17 +26,12 @@ async function signInWithBroker(provider: "google" | "apple") {
     return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 
-  // Use one post-auth entry point for both providers. The /app route checks
-  // the authenticated user's shop through RLS and sends first-time users
-  // without a shop to /onboarding; existing shop owners reach their workspace.
+  // The /app route checks the authenticated user's shop through RLS and
+  // sends first-time users without a shop to /onboarding; existing owners reach their workspace.
   window.location.assign("/app");
   return result;
 }
 
 export function signInWithGoogle() {
-  return signInWithBroker("google");
-}
-
-export function signInWithApple() {
-  return signInWithBroker("apple");
+  return signInWithGoogleBroker();
 }
