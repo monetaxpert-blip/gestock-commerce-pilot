@@ -6,7 +6,8 @@ import { shopQuery } from "@/lib/shop-query";
 
 export const Route = createFileRoute("/_authenticated/app")({
   beforeLoad: async ({ context }) => {
-    const shop = await context.queryClient.fetchQuery(shopQuery);
+    // Always verify shop ownership after OAuth/account changes; a cached result can belong to a previous session.
+    const shop = await context.queryClient.fetchQuery({ ...shopQuery, staleTime: 0 });
     if (!shop) throw redirect({ to: "/onboarding" });
   },
   loader: ({ context }) => context.queryClient.ensureQueryData(shopQuery),
