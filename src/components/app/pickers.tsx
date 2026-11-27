@@ -172,7 +172,7 @@ export function CustomerPicker({ value, onChange, allowNone = true }: {
 
 const customerSchema = z.object({
   name: z.string().trim().min(1, "Indiquez le nom").max(120),
-  phone: z.string().trim().regex(/^\+?[0-9\s]{6,20}$/, "Numéro invalide"),
+  phone: z.string().trim().regex(/^\+?[0-9\s]{6,20}$/, "Numéro invalide").refine((value) => value.replace(/\D/g, "").length >= 6, "Numéro invalide"),
   email: z.union([z.literal(""), z.string().trim().email("E-mail invalide").max(255)]),
   address: z.string().trim().max(200),
   price_tier: z.enum(["retail", "semi", "wholesale"]),
