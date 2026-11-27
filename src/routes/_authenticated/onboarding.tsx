@@ -17,7 +17,8 @@ import { zodErrors, type FormErrors } from "@/lib/validation";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   beforeLoad: async ({ context }) => {
-    const shop = await context.queryClient.fetchQuery(shopQuery);
+    // Always re-check shop ownership for the current authenticated user instead of trusting a cached session result.
+    const shop = await context.queryClient.fetchQuery({ ...shopQuery, staleTime: 0 });
     if (shop) throw redirect({ to: "/app" });
   },
   head: () => ({
