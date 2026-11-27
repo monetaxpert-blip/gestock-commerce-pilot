@@ -352,12 +352,12 @@ function Landing() {
 
       <section className="landing-section landing-security-section" data-reveal>
         <div className="landing-security-icon"><ShieldCheck aria-hidden="true" /></div>
-        <div>
+        <div className="landing-security-content">
           <p className="landing-kicker">VOTRE ESPACE, VOTRE ACTIVITÉ</p>
           <h2>Vos données de boutique ne sont pas celles des autres.</h2>
           <p>GESTOCK est conçu autour d'un espace distinct pour chaque commerce, afin que chacun retrouve son propre environnement de gestion.</p>
+          <div className="landing-security-note"><Check aria-hidden="true" /> Un espace indépendant par boutique</div>
         </div>
-        <div className="landing-security-note"><Check aria-hidden="true" /> Un espace indépendant par boutique</div>
       </section>
 
       <section className="landing-faq-section" id="faq">
