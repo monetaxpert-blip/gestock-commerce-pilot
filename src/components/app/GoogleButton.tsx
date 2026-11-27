@@ -15,7 +15,7 @@ export function GoogleButton({ label = "Continuer avec Google" }: { label?: stri
         return;
       }
       if (result.redirected) return;
-      window.location.assign("/app");
+      // Successful non-redirect OAuth sessions are routed by signInWithGoogle.
     } catch {
       toast.error("La connexion avec Google a échoué. Réessayez.");
       setBusy(false);
