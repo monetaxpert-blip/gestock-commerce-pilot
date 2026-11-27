@@ -62,7 +62,7 @@ export function ArticleSearch({ onPick, stockedOnly = false, autoFocus = false, 
         autoFocus={autoFocus}
         onChange={(e) => setTerm(e.target.value)}
         onFocus={() => setFocus(true)}
-        onBlur={() => setTimeout(() => setFocus(false), 150)}
+        onBlur={() => setFocus(false)}
         placeholder={placeholder}
         className="h-11 pl-9"
         aria-label="Rechercher un article"
@@ -199,8 +199,15 @@ export function CustomerFormDialog({ open, onOpenChange, onSaved, customer }: {
     if (!parsed.success) return setErrors(zodErrors(parsed.error));
     setBusy(true);
     try {
+      const normalizedPhone = normalizeSenegalPhone(parsed.data.phone);
+      const existingCustomers = must(await supabase.from("customers").select("id,phone").eq("shop_id", shop.id));
+      const duplicatePhone = existingCustomers.some((c) => c.id !== customer?.id && normalizeSenegalPhone(c.phone) === normalizedPhone);
+      if (duplicatePhone) {
+        toast.error("Un client utilise déjà ce numéro de téléphone.");
+        return;
+      }
       const payload = {
-        name: parsed.data.name, phone: parsed.data.phone, email: parsed.data.email || null,
+        name: parsed.data.name, phone: normalizedPhone, email: parsed.data.email || null,
         address: parsed.data.address || null, price_tier: parsed.data.price_tier, note: parsed.data.note || null,
       };
       const saved = customer
