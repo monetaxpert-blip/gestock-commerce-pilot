@@ -108,10 +108,8 @@ function Landing() {
     let active = true;
     let routing = false;
 
-    const routeAuthenticatedUser = async () => {
-      if (routing) return;
-      const { data } = await supabase.auth.getSession();
-      if (!active || !data.session) return;
+    const routeAuthenticatedUser = async (hasSession: boolean) => {
+      if (routing || !hasSession) return;
       routing = true;
 
       const { data: shop, error } = await supabase.from("shops").select("id").maybeSingle();
@@ -124,9 +122,12 @@ function Landing() {
       navigate({ to: shop ? "/app" : "/onboarding", replace: true });
     };
 
-    void routeAuthenticatedUser();
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") void routeAuthenticatedUser();
+    void supabase.auth.getSession().then(({ data }) => routeAuthenticatedUser(Boolean(data.session)));
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") {
+        // Defer the query until after Supabase finishes its auth-state callback.
+        void Promise.resolve().then(() => routeAuthenticatedUser(Boolean(session)));
+      }
     });
 
     return () => {
