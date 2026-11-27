@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -97,8 +98,42 @@ const FEATURES = [
 const SAMPLE_BARS = [32, 48, 39, 61, 52, 73, 57, 82, 68, 92, 76, 100];
 
 function Landing() {
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+
+  // OAuth providers may return users to the public root URL. If a session
+  // already exists, bypass the marketing page and route by shop ownership.
+  useEffect(() => {
+    let active = true;
+    let routing = false;
+
+    const routeAuthenticatedUser = async () => {
+      if (routing) return;
+      const { data } = await supabase.auth.getSession();
+      if (!active || !data.session) return;
+      routing = true;
+
+      const { data: shop, error } = await supabase.from("shops").select("id").maybeSingle();
+      if (!active) return;
+      if (error) {
+        routing = false;
+        navigate({ to: "/app", replace: true });
+        return;
+      }
+      navigate({ to: shop ? "/app" : "/onboarding", replace: true });
+    };
+
+    void routeAuthenticatedUser();
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") void routeAuthenticatedUser();
+    });
+
+    return () => {
+      active = false;
+      data.subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1100px)");
