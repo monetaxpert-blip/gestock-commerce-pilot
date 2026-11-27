@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, MailCheck, Apple } from "lucide-react";
+import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/brand/Logo";
 import { GoogleButton } from "@/components/app/GoogleButton";
 import { friendlyError } from "@/lib/rpc";
-import { signInWithApple } from "@/lib/google-auth";
 import { zodErrors, type FormErrors } from "@/lib/validation";
 
 type Mode = "signin" | "signup" | "forgot";
@@ -217,19 +216,8 @@ function AuthPage() {
 
               {mode !== "forgot" && (
                 <div className="mt-7 space-y-5">
-                  <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="grid gap-2">
                     <GoogleButton />
-                    <button type="button" onClick={async () => {
-                      if (busy) return;
-                      setBusy(true);
-                      const result = await signInWithApple();
-                      if (result.error) {
-                        setBusy(false);
-                        toast.error(result.error.message || "La connexion avec Apple a échoué. Réessayez.");
-                      }
-                    }} disabled={busy} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-foreground px-3 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-60">
-                      <Apple className="size-[18px]" /> Continuer avec Apple
-                    </button>
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="h-px flex-1 bg-border" />
