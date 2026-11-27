@@ -262,7 +262,7 @@ function Landing() {
             En un coup d'œil, retrouvez les quantités disponibles, les ventes enregistrées et la marge brute estimée. Les informations sont regroupées dans votre espace, sans jongler entre cahiers et fichiers.
           </p>
         </div>
-        <div className="landing-benefit-viewport">
+        <div className="landing-benefit-viewport" onTouchStart={(e) => { const track = e.currentTarget.querySelector(".landing-benefit-track"); if (track) track.style.animationPlayState = "paused"; }} onTouchEnd={(e) => { const track = e.currentTarget.querySelector(".landing-benefit-track"); if (track) { track.style.animationPlayState = "paused"; window.setTimeout(() => { track.style.animationPlayState = ""; }, 1800); } }}>
           <div className="landing-benefit-track">
             {[0, 1].map((copy) => (
               <div className="landing-benefit-grid" key={copy} aria-hidden={copy === 1}>
@@ -300,7 +300,7 @@ function Landing() {
             Produits, quantités, ventes, commandes et clients : vos informations sont organisées dans un espace unique.
           </p>
         </div>
-        <div className="landing-feature-viewport">
+        <div className="landing-feature-viewport" onTouchStart={(e) => { const track = e.currentTarget.querySelector(".landing-feature-track"); if (track) track.style.animationPlayState = "paused"; }} onTouchEnd={(e) => { const track = e.currentTarget.querySelector(".landing-feature-track"); if (track) { track.style.animationPlayState = "paused"; window.setTimeout(() => { track.style.animationPlayState = ""; }, 1800); } }}>
           <div className="landing-feature-track">
             {[0, 1].map((copy) => (
               <div className="landing-feature-grid" key={copy} aria-hidden={copy === 1}>
