@@ -50,6 +50,7 @@ export function ArticleSearch({ onPick, stockedOnly = false, autoFocus = false, 
     if (pick) {
       onPick(pick);
       setTerm("");
+      setFocus(false);
     } else if (results.length === 0) toast.error("Aucun article ne correspond à cette recherche.");
   }
 
@@ -83,6 +84,7 @@ export function ArticleSearch({ onPick, stockedOnly = false, autoFocus = false, 
                 onClick={() => {
                   onPick(a);
                   setTerm("");
+                  setFocus(false);
                 }}
                 className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left hover:bg-accent"
               >
