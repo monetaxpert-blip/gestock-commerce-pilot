@@ -29,9 +29,9 @@ function normalizeSenegalPhone(value: string): string {
   const digits = compact.replace(/\D/g, "");
   if (digits.length === 9 && /^[37]/.test(digits)) return `+221${digits}`;
   if (digits.length === 12 && digits.startsWith("221")) return `+${digits}`;
+  if (digits.length === 14 && digits.startsWith("00221")) return `+${digits.slice(2)}`;
   return compact;
 }
-
 export function filterArticles(list: ArticleRow[], term: string) {
   const t = normalize(term.trim());
   if (!t) return list;
