@@ -208,7 +208,7 @@ export function CustomerFormDialog({ open, onOpenChange, onSaved, customer }: {
     setBusy(true);
     try {
       const normalizedPhone = normalizeSenegalPhone(parsed.data.phone);
-      const existingCustomers = must(await supabase.from("customers").select("id,phone").eq("shop_id", shop.id));
+      const existingCustomers = must(await supabase.from("customers").select("id,phone").eq("shop_id", shop.id)) ?? [];
       const duplicatePhone = existingCustomers.some((c) => c.id !== customer?.id && normalizeSenegalPhone(c.phone) === normalizedPhone);
       if (duplicatePhone) {
         toast.error("Un client utilise déjà ce numéro de téléphone.");

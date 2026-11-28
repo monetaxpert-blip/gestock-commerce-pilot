@@ -67,12 +67,30 @@ function ResetPassword() {
         ) : (
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div className="space-y-1.5">
-              <Label>Nouveau mot de passe</Label>
-              <Input type="password" autoComplete="new-password" value={password} onChange={(e) => { setPassword(e.target.value); setError(""); }} />
+              <Label htmlFor="reset-password">Nouveau mot de passe</Label>
+              <Input
+                id="reset-password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError("");
+                }}
+              />
             </div>
             <div className="space-y-1.5">
-              <Label>Confirmation</Label>
-              <Input type="password" autoComplete="new-password" value={confirm} onChange={(e) => { setConfirm(e.target.value); setError(""); }} />
+              <Label htmlFor="reset-password-confirmation">Confirmation</Label>
+              <Input
+                id="reset-password-confirmation"
+                type="password"
+                autoComplete="new-password"
+                value={confirm}
+                onChange={(e) => {
+                  setConfirm(e.target.value);
+                  setError("");
+                }}
+              />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="h-11 w-full" disabled={busy}>
