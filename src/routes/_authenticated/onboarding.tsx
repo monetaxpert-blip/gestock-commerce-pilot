@@ -36,7 +36,7 @@ const schema = z.object({
   name: z.string().trim().min(2, "Nom trop court").max(80),
   sector: z.string().min(1, "Choisissez une activité"),
   city: z.string().trim().max(80),
-  phone: z.string().trim().max(30).regex(/^(\+?[0-9\s]{8,20})?$/, "Numéro invalide"),
+  phone: z.string().trim().max(30).regex(/^$|^(?=.*[0-9])\+?[0-9\s]{8,20}$/, "Numéro invalide"),
   address: z.string().trim().max(200),
 });
 

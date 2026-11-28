@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/brand/Logo";
+import { FormField as Field } from "@/components/app/FormField";
 import { GoogleButton } from "@/components/app/GoogleButton";
 import { friendlyError } from "@/lib/rpc";
 import { zodErrors, type FormErrors } from "@/lib/validation";
@@ -48,7 +48,6 @@ function translateAuthError(message: string): string {
   if (/rate limit/i.test(message)) return "Trop de tentatives. Patientez quelques minutes.";
   return friendlyError({ message });
 }
-
 function AuthPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
@@ -301,19 +300,6 @@ function AuthPage() {
           )}
         </div>
       </main>
-    </div>
-  );
-}
-
-function Field({ label, error, aside, children }: { label: string; error?: string | undefined; aside?: ReactNode; children: ReactNode }) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <Label className="text-[0.8rem] font-medium">{label}</Label>
-        {aside}
-      </div>
-      {children}
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
 }

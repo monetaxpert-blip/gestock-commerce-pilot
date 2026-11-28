@@ -22,6 +22,7 @@ function SettingsPage(){
  const [negative,setNegative]=useState(shop.allow_negative_stock);
  const mutation=useMutation({mutationFn:async()=>{
   if(!name.trim())throw new Error("Le nom de la boutique est obligatoire.");
+  if(phone.trim()&&(!/^\+?[0-9\s]{8,20}$/.test(phone.trim())||!/[0-9]/.test(phone)))throw new Error("Le téléphone doit contenir uniquement des chiffres, des espaces et éventuellement le préfixe +.");
   const {error}=await supabase.from("shops").update({name:name.trim(),phone:phone.trim()||null,address:address.trim()||null,city:city.trim()||null,sector:sector.trim()||null,receipt_footer:footer.trim()||null,allow_negative_stock:negative}).eq("id",shop.id);
   if(error)throw error;
  },onSuccess:async()=>{await qc.invalidateQueries({queryKey:["shop"]});toast.success("Paramètres enregistrés.");},onError:(e)=>toast.error((e as Error).message||"Enregistrement impossible.")});
@@ -32,7 +33,7 @@ function SettingsPage(){
    <Panel title="Informations du commerce" description="Ces informations peuvent servir dans vos documents et reçus.">
     <form className="space-y-4" onSubmit={e=>{e.preventDefault();mutation.mutate();}}>
      <div><label className="mb-1.5 block text-sm font-medium">Nom de la boutique *</label><Input value={name} onChange={e=>setName(e.target.value)} required disabled={!access.writable}/></div>
-     <div><label className="mb-1.5 block text-sm font-medium">Téléphone</label><Input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+221…" disabled={!access.writable}/></div>
+     <div><label className="mb-1.5 block text-sm font-medium">Téléphone</label><Input type="tel" inputMode="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+221…" disabled={!access.writable}/></div>
      <div><label className="mb-1.5 block text-sm font-medium">Adresse</label><Input value={address} onChange={e=>setAddress(e.target.value)} disabled={!access.writable}/></div>
      <div className="grid gap-3 sm:grid-cols-2"><div><label className="mb-1.5 block text-sm font-medium">Ville</label><Input value={city} onChange={e=>setCity(e.target.value)} placeholder="Dakar" disabled={!access.writable}/></div><div><label className="mb-1.5 block text-sm font-medium">Secteur d'activité</label><Input value={sector} onChange={e=>setSector(e.target.value)} disabled={!access.writable}/></div></div>
      <div><label className="mb-1.5 block text-sm font-medium">Message au bas des reçus</label><Input value={footer} onChange={e=>setFooter(e.target.value)} placeholder="Merci pour votre confiance." disabled={!access.writable}/></div>

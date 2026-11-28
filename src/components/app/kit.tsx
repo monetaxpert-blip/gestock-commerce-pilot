@@ -93,7 +93,7 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: (() =
         <AlertTriangle className="size-5" />
       </div>
       <p className="text-sm font-medium">Chargement impossible</p>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">{(error as Error)?.message ?? "Une erreur est survenue."}</p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">{/Cannot coerce the result to a single JSON object|JSON object/i.test((error as Error)?.message ?? "") ? "Cet élément est introuvable ou vous n’avez pas l’autorisation d’y accéder." : (error as Error)?.message ?? "Une erreur est survenue."}</p>
       {onRetry && (
         <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>
           <RefreshCw /> Réessayer

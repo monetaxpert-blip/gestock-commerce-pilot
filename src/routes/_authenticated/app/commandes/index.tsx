@@ -22,12 +22,12 @@ function OrdersPage(){
  const filtered=useMemo(()=>rows.filter(o=>(o.number+" "+customer(o.customer_id)).toLowerCase().includes(term.trim().toLowerCase())),[rows,term,customers]);
  const open=rows.filter(o=>!["livree","annulee"].includes(o.status));
  const overdue=open.filter(o=>o.expected_date&&o.expected_date<new Date().toISOString().slice(0,10));
- const deposits=rows.reduce((sum,o)=>sum+Number(o.deposit_total),0);
+ const deposits=filtered.reduce((sum,o)=>sum+Number(o.deposit_total),0);
  const label=(status:string)=>({en_attente:"En attente",confirmee:"Confirmée",preparee:"Préparée",livree:"Livrée",annulee:"Annulée"} as Record<string,string>)[status]??status;
  const tone=(status:string)=>status==="annulee"?"danger":status==="livree"?"success":status==="preparee"?"brand":"warning";
  return <>
  <PageHeader title="Commandes" description="Suivez les commandes clients, les acomptes et les dates prévues." actions={<Button asChild><Link to="/app/commandes/nouveau"><Plus/> Nouvelle commande</Link></Button>}/>
- <div className="mb-5 grid gap-3 sm:grid-cols-3"><StatCard label="À traiter" value={open.length} icon={ClipboardList} hint="Commandes non livrées ou annulées"/><StatCard label="En retard" value={overdue.length} icon={ClipboardList} tone={overdue.length?"brand":"default"} hint="Date prévue dépassée"/><StatCard label="Acomptes reçus" value={money(deposits)} icon={ClipboardList} hint="Total sur les commandes listées"/></div>
+ <div className="mb-5 grid gap-3 sm:grid-cols-3"><StatCard label="À traiter" value={open.length} icon={ClipboardList} hint="Commandes non livrées ou annulées"/><StatCard label="En retard" value={overdue.length} icon={ClipboardList} tone={overdue.length?"brand":"default"} hint="Date prévue dépassée"/><StatCard label="Acomptes reçus" value={money(deposits)} icon={ClipboardList} hint="Total des résultats filtrés"/></div>
  <Panel><div className="mb-4 relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input className="pl-9" placeholder="Rechercher par numéro ou client" value={term} onChange={e=>setTerm(e.target.value)}/></div>
  {q.error?<ErrorState error={q.error} onRetry={()=>q.refetch()}/>:q.isLoading||cq.isLoading?<LoadingRows/>:rows.length===0?<EmptyState icon={ClipboardList} title="Aucune commande" description="Les commandes de vos clients seront regroupées ici."/>:filtered.length===0?<p className="py-8 text-center text-sm text-muted-foreground">Aucun résultat trouvé.</p>:
  <DataTable head={<><Th>Commande</Th><Th>Client</Th><Th>Créée le</Th><Th>Échéance</Th><Th>État</Th><Th className="text-right">Total</Th><Th className="text-right">Acompte</Th></>}>

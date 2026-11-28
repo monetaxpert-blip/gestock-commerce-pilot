@@ -24,6 +24,14 @@ function normalize(s: string) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
+function normalizeSenegalPhone(value: string): string {
+  const compact = value.replace(/[^\d+]/g, "");
+  const digits = compact.replace(/\D/g, "");
+  if (digits.length === 9 && /^[37]/.test(digits)) return `+221${digits}`;
+  if (digits.length === 12 && digits.startsWith("221")) return `+${digits}`;
+  if (digits.length === 14 && digits.startsWith("00221")) return `+${digits.slice(2)}`;
+  return compact;
+}
 export function filterArticles(list: ArticleRow[], term: string) {
   const t = normalize(term.trim());
   if (!t) return list;
@@ -50,6 +58,7 @@ export function ArticleSearch({ onPick, stockedOnly = false, autoFocus = false, 
     if (pick) {
       onPick(pick);
       setTerm("");
+      setFocus(false);
     } else if (results.length === 0) toast.error("Aucun article ne correspond à cette recherche.");
   }
 
@@ -61,7 +70,7 @@ export function ArticleSearch({ onPick, stockedOnly = false, autoFocus = false, 
         autoFocus={autoFocus}
         onChange={(e) => setTerm(e.target.value)}
         onFocus={() => setFocus(true)}
-        onBlur={() => setTimeout(() => setFocus(false), 150)}
+        onBlur={() => setFocus(false)}
         placeholder={placeholder}
         className="h-11 pl-9"
         aria-label="Rechercher un article"
@@ -83,6 +92,7 @@ export function ArticleSearch({ onPick, stockedOnly = false, autoFocus = false, 
                 onClick={() => {
                   onPick(a);
                   setTerm("");
+                  setFocus(false);
                 }}
                 className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left hover:bg-accent"
               >
@@ -162,7 +172,7 @@ export function CustomerPicker({ value, onChange, allowNone = true }: {
 
 const customerSchema = z.object({
   name: z.string().trim().min(1, "Indiquez le nom").max(120),
-  phone: z.string().trim().regex(/^\+?[0-9\s]{6,20}$/, "Numéro invalide"),
+  phone: z.string().trim().regex(/^\+?[0-9\s]{6,20}$/, "Numéro invalide").refine((value) => value.replace(/\D/g, "").length >= 6, "Numéro invalide"),
   email: z.union([z.literal(""), z.string().trim().email("E-mail invalide").max(255)]),
   address: z.string().trim().max(200),
   price_tier: z.enum(["retail", "semi", "wholesale"]),
@@ -197,8 +207,15 @@ export function CustomerFormDialog({ open, onOpenChange, onSaved, customer }: {
     if (!parsed.success) return setErrors(zodErrors(parsed.error));
     setBusy(true);
     try {
+      const normalizedPhone = normalizeSenegalPhone(parsed.data.phone);
+      const existingCustomers = must(await supabase.from("customers").select("id,phone").eq("shop_id", shop.id)) ?? [];
+      const duplicatePhone = existingCustomers.some((c) => c.id !== customer?.id && normalizeSenegalPhone(c.phone) === normalizedPhone);
+      if (duplicatePhone) {
+        toast.error("Un client utilise déjà ce numéro de téléphone.");
+        return;
+      }
       const payload = {
-        name: parsed.data.name, phone: parsed.data.phone, email: parsed.data.email || null,
+        name: parsed.data.name, phone: normalizedPhone, email: parsed.data.email || null,
         address: parsed.data.address || null, price_tier: parsed.data.price_tier, note: parsed.data.note || null,
       };
       const saved = customer
